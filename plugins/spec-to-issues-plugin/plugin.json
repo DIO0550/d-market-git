@@ -1,0 +1,10 @@
+{
+  "name": "spec-to-issues-plugin",
+  "version": "1.0.0",
+  "description": "仕様書からGitHub Issueを自動生成するプラグイン（Epic・子Issue作成・親子リンク）",
+  "author": {
+    "name": "DIO0550"
+  },
+  "repository": "https://github.com/DIO0550/d-market",
+  "license": "MIT"
+}

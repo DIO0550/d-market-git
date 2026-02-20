@@ -13,6 +13,11 @@
       "name": "workflow-automation-plugin",
       "source": "./plugins/workflow-automation-plugin",
       "description": "ワークフロー自動化プラグイン（PR CIエラー修正・レビュー指摘修正）"
+    },
+    {
+      "name": "spec-to-issues-plugin",
+      "source": "./plugins/spec-to-issues-plugin",
+      "description": "仕様書からGitHub Issue自動生成プラグイン（Epic・子Issue作成・親子リンク）"
     }
   ]
 }
