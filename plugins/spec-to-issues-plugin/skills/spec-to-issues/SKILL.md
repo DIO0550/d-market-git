@@ -173,9 +173,6 @@ MDファイルの解析結果をもとに、3階層のIssue分解計画を作成
 ```
 ## Issue作成計画
 
-### 元仕様書
-- ファイル: `{md_file_path}`
-
 ### Epic
 - [Epic] {タイトル}
 
@@ -266,10 +263,7 @@ EPIC_URL=$(gh issue create \
   --title "[Epic] {タイトル}" \
   --body "$(cat <<'EOF'
 ## 概要
-{仕様書の概要}
-
-## 対象仕様書
-- ファイル: `{md_file_path}`
+{概要}
 
 ## Issue一覧
 （作成後に更新）
@@ -315,11 +309,9 @@ echo "Created: #${CHILD_NUM}"
 
 ### Issue本文の必須項目
 
-- **概要**: 仕様書の該当セクションの要約
-- **背景**: 元仕様書ファイルパス + 親Epic番号
+- **概要**: 何をやるかの要約
 - **タスク**: チェックリスト形式の作業項目
 - **依存関係**: `Blocked by: #{XX}, #{YY}` の形式で明示（なければ省略可）
-- **関連**: 親Epic番号
 
 ## Step 7: Epic ← Issue 親子リンク設定
 
@@ -383,7 +375,6 @@ gh api graphql -f query='
 
 ## 関連
 - 親Issue: #{parent_issue_number}
-- Epic: #{epic_number}
 ```
 
 ### 作成コマンド
