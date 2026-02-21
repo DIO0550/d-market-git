@@ -8,70 +8,27 @@ description: 仕様書・設計書からGitHub Issueを自動生成するスキ�
 仕様書・設計書のMDファイルからGitHub Issueを自動生成するスキル。
 Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明示する。
 
-## ワークフロー
+2つのエージェントで分担して実行する:
+- **spec-analyzer-agent**: 仕様書を解析し `.issues-plan.md` に分解計画を書き出す
+- **issues-creator-agent**: `.issues-plan.md` からGitHub Issueを作成する
+
+---
+
+## Part 1: 仕様書解析（spec-analyzer-agent が使用）
+
+### ワークフロー
 
 ```
 1. MDファイルの読み込みと解析
    ↓
 2. ユーザー設定の確認（.spec-to-issues.yml）
    ↓
-3. Issue分解計画の作成（3階層 + 依存関係）→ ユーザー承認
+3. 3階層 + 依存関係の分解計画を作成
    ↓
-4. TaskCreateで全タスク事前作成
-   ↓
-5. Epic Issue作成
-   ↓
-6. Issue作成（中粒度、依存関係順に1件ずつ）
-   ↓
-7. Epic ← Issue 親子リンク設定
-   ↓
-8. Sub-issue作成（細粒度、各Issueごとに作成）
-   ↓
-9. Issue ← Sub-issue 親子リンク設定
-   ↓
-10. Epic本文をIssue番号で更新
-   ↓
-11. 完了サマリー報告
+4. .issues-plan.md に書き出し
 ```
 
-## 前提・準備
-
-### ラベル作成
-
-リポジトリにラベルがない場合、`scripts/create-github-labels.sh`で一括作成:
-
-```bash
-# カレントリポジトリに作成
-bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
-
-# ドライラン（実行内容のみ表示）
-DRY_RUN=1 bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
-
-# 既存ラベルも上書き更新
-FORCE_UPDATE=1 bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
-```
-
-### ラベル一覧
-
-| カテゴリ | ラベル | 説明 |
-|:--|:--|:--|
-| 種別 | `type:epic` | エピック/親Issue |
-| 種別 | `type:feature` | 新機能/機能追加 |
-| 種別 | `type:migration` | マイグレーション/移行 |
-| 種別 | `type:chore` | 雑務/設定 |
-| 種別 | `type:test` | テスト関連 |
-| 種別 | `type:docs` | ドキュメント関連 |
-| 領域 | `area:frontend` | フロントエンド |
-| 領域 | `area:server` | バックエンド/サーバ |
-| 領域 | `area:shared` | 共有/横断 |
-| 優先度 | `priority:P1` | 最優先（ブロッカー） |
-| 優先度 | `priority:P2` | 高優先度 |
-| 優先度 | `priority:P3` | 通常優先度 |
-| 規模 | `size:S` | 小（1日以内） |
-| 規模 | `size:M` | 中（1-3日） |
-| 規模 | `size:L` | 大（3日以上） |
-
-## Step 1: MDファイルの読み込みと解析
+### Step 1: MDファイルの読み込みと解析
 
 1. ユーザーが指定したMDファイルのパスを確認
 2. ファイルを読み込み、ドキュメント構造を解析
@@ -81,7 +38,7 @@ FORCE_UPDATE=1 bash plugins/spec-to-issues-plugin/scripts/create-github-labels.s
    - サブセクション（H3以下）
    - 機能要件、技術詳細、依存関係
 
-### MD解析ガイドライン
+#### MD解析ガイドライン
 
 **見出しレベルとIssue構造の対応:**
 
@@ -143,9 +100,8 @@ FORCE_UPDATE=1 bash plugins/spec-to-issues-plugin/scripts/create-github-labels.s
 | 機能実装 → ドキュメント | Docsは実装後 |
 
 - 依存関係はIssue間で設定する（Sub-issue間では不要）
-- 作成順序はトポロジカルソート（依存元を先に作成）
 
-## Step 2: ユーザー設定の確認
+### Step 2: ユーザー設定の確認
 
 プロジェクトルートに `.spec-to-issues.yml` が存在するか確認する。
 
@@ -154,109 +110,147 @@ FORCE_UPDATE=1 bash plugins/spec-to-issues-plugin/scripts/create-github-labels.s
 
 設定スキーマの詳細は `references/config-schema.md` を参照。
 
-### カスタマイズ可能な項目
+### Step 3: `.issues-plan.md` への書き出し
 
-- タイトルフォーマット
-- デフォルトラベル
-- カスタムラベル（自動付与）
-- エリア判定キーワード
-- テンプレート上書き
-- Issue分解の制約（最大作業日数、最大Issue数、Sub-issue数）
-- Assignee、Milestone、Project
+分解計画をプロジェクトルートの `.issues-plan.md` に書き出す。
 
-## Step 3: Issue分解計画の作成と承認
+#### 出力フォーマット
 
-MDファイルの解析結果をもとに、3階層のIssue分解計画を作成してユーザーに提示する。
+```markdown
+# Issue分解計画
 
-**提示フォーマット:**
+## Epic
+
+- title: {Epicタイトル}
+- labels: type:epic
+
+## Issues
+
+### 1. {Issueタイトル}
+
+- labels: {label1}, {label2}, ...
+- blocked_by: []
+- body: |
+    ## 概要
+    {概要テキスト}
+
+    ## タスク
+    - [ ] タスク1
+    - [ ] タスク2
+
+    ## 依存関係
+    - Blocked by: なし
+
+#### Sub-issues
+
+1. {Sub-issueタイトル}
+   - labels: {label1}, {label2}
+   - body: |
+       ## 概要
+       {概要テキスト}
+       ## タスク
+       - [ ] タスク1
+
+2. {Sub-issueタイトル}
+   - labels: {label1}, {label2}
+   - body: |
+       ## 概要
+       {概要テキスト}
+       ## タスク
+       - [ ] タスク1
+
+### 2. {Issueタイトル}
+
+- labels: {label1}, {label2}, ...
+- blocked_by: [1]
+- body: |
+    ## 概要
+    {概要テキスト}
+
+    ## タスク
+    - [ ] タスク1
+
+    ## 依存関係
+    - Blocked by: （Issue作成時に実番号に置換）
+
+#### Sub-issues
+...
+
+## 依存関係グラフ
+
+#1 → #2
+#1 → #3
+```
+
+#### フォーマットルール
+
+- Issueは `### {連番}. {タイトル}` で定義
+- `labels`: カンマ区切りのラベル一覧
+- `blocked_by`: 依存先Issueの連番リスト（`[]` は依存なし）
+- `body`: `|` の後にインデント付きでIssue本文（Markdown）
+- Sub-issuesは `#### Sub-issues` セクション内に番号付きリストで定義
+- 依存関係グラフは `#連番 → #連番` 形式
+
+---
+
+## Part 2: Issue作成（issues-creator-agent が使用）
+
+### ワークフロー
 
 ```
-## Issue作成計画
-
-### Epic
-- [Epic] {タイトル}
-
-### Issue一覧（計 {n}件）
-
-#### 1. [Feature][{area}] {Component}: {要約} (size:{S/M/L}, priority:{P1/P2/P3})
-   Sub-issues:
-   - {sub_issue_1}
-   - {sub_issue_2}
-
-#### 2. [Feature][{area}] {Component}: {要約} (size:{S/M/L}, priority:{P1/P2/P3})
-   Sub-issues:
-   - {sub_issue_1}
-   - {sub_issue_2}
-   Blocked by: #1
-
-#### 3. [Test] {要約} (size:{S/M/L}, priority:{P1/P2/P3})
-   Sub-issues:
-   - {sub_issue_1}
-   Blocked by: #1, #2
-
-#### 4. [Docs] {要約} (size:{S/M/L}, priority:{P1/P2/P3})
-   Sub-issues:
-   - {sub_issue_1}
-   Blocked by: #1, #2
-
-### 依存関係グラフ
-#1 → #2 → #3
-#1 → #4
-
-この計画でIssueを作成してもよろしいですか？
+1. .issues-plan.md の読み込みとパース
+   ↓
+2. ユーザーに確認・承認
+   ↓
+3. TaskCreateで全タスク事前作成
+   ↓
+4. Epic Issue作成
+   ↓
+5. Issue作成（依存関係順に1件ずつ）
+   ↓
+6. Epic ← Issue 親子リンク設定
+   ↓
+7. Sub-issue作成（各Issueごと）
+   ↓
+8. Issue ← Sub-issue 親子リンク設定
+   ↓
+9. Epic本文をIssue番号で更新
+   ↓
+10. 完了サマリー報告
 ```
 
-※ 計画段階ではIssueを連番（#1, #2, ...）で参照。作成後に実際のGitHub Issue番号に置き換わる。
+### Step 1: `.issues-plan.md` の読み込みとパース
 
-**ユーザーが計画を修正可能:**
-- Issueの追加/削除/名前変更
-- Sub-issueの追加/削除/名前変更
-- 優先度/規模の変更
-- 依存関係の変更
+プロジェクトルートの `.issues-plan.md` を読み込み、以下を抽出する:
 
-**承認を得てから次のステップに進む。**
+- **Epic**: タイトル、ラベル
+- **Issues**: 各Issueのタイトル、ラベル、依存関係（blocked_by）、本文
+- **Sub-issues**: 各Issue配下のSub-issueタイトル、ラベル、本文
+- **依存関係グラフ**
 
-## Step 4: タスク管理
+#### パースルール
 
-### タスク管理ルール
+- `### {数字}. ` で始まる行がIssue定義の開始
+- `- labels:` の値はカンマ区切りでsplit
+- `- blocked_by: [{...}]` は数値配列としてパース（`[]` は依存なし）
+- `- body: |` の次行以降、インデントされた行がIssue本文
+- `#### Sub-issues` 以降の番号付きリストがSub-issue定義
 
-- **Issue分解計画の承認後、作成に着手する前に全タスクをTaskCreateで作成する**
-- タスクは1 Issue = 1タスクで管理（Epic作成 + 各Issue作成 + Sub-issue作成 + リンク設定）
-- タスクの`subject`には具体的なIssue内容を書く
+### Step 2: ユーザー確認
+
+パース結果をユーザーに提示し、承認を得る。
+
+### Step 3: タスク管理
+
+- **承認後、作成に着手する前に全タスクをTaskCreateで作成する**
+- タスクは1 Issue = 1タスクで管理（Epic + 各Issue + Sub-issue一括 + リンク設定）
 - `activeForm`を必ず設定する
 - 作成開始時: `TaskUpdate`で`status: "in_progress"`に更新
 - 作成完了後: `TaskUpdate`で`status: "completed"`に更新
-- 全タスク完了後にサマリーを報告
 
-**タスク作成例:**
-
-```
-TaskCreate:
-  subject: "Epic Issue作成 - [Epic] ユーザープロフィール機能"
-  activeForm: "Epic Issueを作成中"
-
-TaskCreate:
-  subject: "Issue作成 - [Feature][frontend] ProfilePage: プロフィール画面の実装"
-  activeForm: "[Feature] ProfilePage Issueを作成中"
-
-TaskCreate:
-  subject: "Sub-issue作成 - ProfilePage配下の3件"
-  activeForm: "ProfilePage Sub-issueを作成中"
-
-TaskCreate:
-  subject: "親子リンク設定（Epic ← Issue）"
-  activeForm: "Epic-Issue間のリンクを設定中"
-
-TaskCreate:
-  subject: "親子リンク設定（Issue ← Sub-issue）"
-  activeForm: "Issue-Sub-issue間のリンクを設定中"
-```
-
-## Step 5: Epic Issue作成
+### Step 4: Epic Issue作成
 
 テンプレート: `references/templates/epic.template.md`
-
-**デフォルトタイトル形式**: `[Epic] {ドキュメントタイトル}`
 
 ```bash
 EPIC_URL=$(gh issue create \
@@ -272,72 +266,46 @@ EOF
   --label "type:epic")
 
 EPIC_NUM=$(echo "$EPIC_URL" | grep -oE '[0-9]+$')
-echo "Created Epic: #${EPIC_NUM}"
 ```
 
-## Step 6: Issue作成
+### Step 5: Issue作成
 
-各Issueを依存関係の順序に従って1件ずつ作成する。依存元（Blocked byの対象）を先に作成し、実際のIssue番号が確定してから依存先を作成する。
+`blocked_by` に基づいてトポロジカルソートし、依存元を先に作成。
+作成時に連番を実際のGitHub Issue番号に置換して本文に埋め込む。
 
-### Issue種類とテンプレート
+#### Issue種類とテンプレート
 
-| 種類 | テンプレート | デフォルトタイトル形式 | ラベル |
-|:--|:--|:--|:--|
-| Feature | `references/templates/feature.template.md` | `[Feature][{area}] {Component}: {要約}` | `type:feature` |
-| Migration | `references/templates/migration.template.md` | `[Migration] {要約}` | `type:migration` |
-| Test | `references/templates/test.template.md` | `[Test] {要約}` | `type:test` |
-| Docs | `references/templates/docs.template.md` | `[Docs] {要約}` | `type:docs` |
-| Chore | `references/templates/chore.template.md` | `[Chore] {要約}` | `type:chore` |
-
-### 作成コマンド
+| 種類 | テンプレート | ラベル |
+|:--|:--|:--|
+| Feature | `references/templates/feature.template.md` | `type:feature` |
+| Migration | `references/templates/migration.template.md` | `type:migration` |
+| Test | `references/templates/test.template.md` | `type:test` |
+| Docs | `references/templates/docs.template.md` | `type:docs` |
+| Chore | `references/templates/chore.template.md` | `type:chore` |
 
 ```bash
 CHILD_URL=$(gh issue create \
   --title "{タイトル}" \
-  --body "$(cat <<'EOF'
-{テンプレートに基づいた本文}
-EOF
-)" \
-  --label "{type_label}" \
-  --label "{area_label}" \
-  --label "{priority_label}" \
-  --label "{size_label}")
-
-CHILD_NUM=$(echo "$CHILD_URL" | grep -oE '[0-9]+$')
-echo "Created: #${CHILD_NUM}"
+  --body "{本文（blocked_byを実番号に置換済み）}" \
+  --label "{label1}" --label "{label2}" ...)
 ```
 
-### Issue本文の必須項目
-
-- **概要**: 何をやるかの要約
-- **タスク**: チェックリスト形式の作業項目
-- **依存関係**: `Blocked by: #{XX}, #{YY}` の形式で明示（なければ省略可）
-
-## Step 7: Epic ← Issue 親子リンク設定
-
-GitHub GraphQL APIで`addSubIssue` mutationを使用してEpicとIssueの親子関係を設定する。
-
-### Node ID取得
+### Step 6: Epic ← Issue 親子リンク設定
 
 ```bash
 REPO_OWNER=$(gh repo view --json owner --jq '.owner.login')
 REPO_NAME=$(gh repo view --json name --jq '.name')
 
+# Node ID取得
 gh api graphql -f query='
   query($owner: String!, $repo: String!, $number: Int!) {
     repository(owner: $owner, name: $repo) {
-      issue(number: $number) {
-        id
-        title
-      }
+      issue(number: $number) { id }
     }
   }
 ' -f owner="$REPO_OWNER" -f repo="$REPO_NAME" -F number={issue_number}
-```
 
-### Sub-issue紐付け
-
-```bash
+# 紐付け
 gh api graphql -f query='
   mutation($parentId: ID!, $childId: ID!) {
     addSubIssue(input: {issueId: $parentId, subIssueId: $childId}) {
@@ -348,60 +316,19 @@ gh api graphql -f query='
 ' -f parentId="{epic_node_id}" -f childId="{issue_node_id}"
 ```
 
-## Step 8: Sub-issue作成
+### Step 7: Sub-issue作成
 
-各Issueに対して、細粒度のSub-issueを作成する。
-
-### Sub-issueの特徴
-
-- 半日〜1日で完了可能な単位
-- 1つのIssueにつき2-5件程度
-- テンプレートファイルは使わず、シンプルな本文で作成
-
-### Sub-issueタイトル形式
-
-親Issueのプレフィックスを引き継ぐ:
-- `[Feature][frontend] ProfilePage - レイアウト実装`
-- `[Migration] Phase 1 - スキーマ変更`
-
-### Sub-issue本文フォーマット
-
-```markdown
-## 概要
-{sub_issue_summary}
-
-## タスク
-{task_checklist}
-
-## 関連
-- 親Issue: #{parent_issue_number}
-```
-
-### 作成コマンド
+各Issueに対して `.issues-plan.md` に定義されたSub-issueを作成。
+タイトルは親Issueのプレフィックスを引き継ぐ。
 
 ```bash
 SUB_URL=$(gh issue create \
   --title "{parent_prefix} - {sub_issue_title}" \
-  --body "$(cat <<'EOF'
-{Sub-issue本文}
-EOF
-)" \
-  --label "{type_label}" \
-  --label "{size_label}")
-
-SUB_NUM=$(echo "$SUB_URL" | grep -oE '[0-9]+$')
-echo "Created Sub-issue: #${SUB_NUM}"
+  --body "{Sub-issue本文}" \
+  --label "{label1}" --label "{label2}")
 ```
 
-### Sub-issueのラベル
-
-- 親Issueの種別ラベル（`type:feature`等）を引き継ぐ
-- `size:S` を基本とする（細粒度のため）
-- 領域ラベル・優先度ラベルは不要（親Issueから推測可能）
-
-## Step 9: Issue ← Sub-issue 親子リンク設定
-
-各Issueに対して、そのSub-issueを`addSubIssue`で紐付ける。
+### Step 8: Issue ← Sub-issue 親子リンク設定
 
 ```bash
 gh api graphql -f query='
@@ -414,27 +341,17 @@ gh api graphql -f query='
 ' -f parentId="{issue_node_id}" -f childId="{sub_issue_node_id}"
 ```
 
-## Step 10: Epic本文更新
+### Step 9: Epic本文更新
 
-全Issue作成後、Epic本文の「Issue一覧」セクションを実際のIssue番号で更新する。
-
-```bash
-gh issue edit {epic_number} --body "{更新された本文}"
-```
-
-Issue一覧のフォーマット（依存関係も記載）:
+全Issue作成後、Epicの「Issue一覧」を実番号で更新。
 
 ```markdown
 ## Issue一覧
-- [ ] #{issue_1} [Feature][frontend] ProfilePage: プロフィール画面の実装
-- [ ] #{issue_2} [Feature][server] ProfileAPI: プロフィールAPIエンドポイント (Blocked by #{issue_1})
-- [ ] #{issue_3} [Test] プロフィール機能のテスト (Blocked by #{issue_1}, #{issue_2})
-- [ ] #{issue_4} [Docs] プロフィールAPI仕様書 (Blocked by #{issue_1}, #{issue_2})
+- [ ] #{issue_1} {タイトル}
+- [ ] #{issue_2} {タイトル} (Blocked by #{issue_1})
 ```
 
-## Step 11: 完了サマリー報告
-
-全タスク完了後、以下のサマリーを報告する:
+### Step 10: 完了サマリー報告
 
 ```
 ## Issue作成サマリー
@@ -443,20 +360,41 @@ Issue一覧のフォーマット（依存関係も記載）:
 - #{epic_number} [Epic] {タイトル}
 
 ### Issue（{n}件）+ Sub-issue（{m}件）
-- [x] #{issue_1} [Feature][frontend] {要約} (Sub-issues: #{s1}, #{s2}, #{s3})
-- [x] #{issue_2} [Feature][server] {要約} (Blocked by #{issue_1}) (Sub-issues: #{s4}, #{s5})
-- [x] #{issue_3} [Test] {要約} (Blocked by #{issue_1}, #{issue_2}) (Sub-issues: #{s6})
-- [x] #{issue_4} [Docs] {要約} (Blocked by #{issue_1}, #{issue_2}) (Sub-issues: #{s7})
+- [x] #{issue_1} {タイトル} (Sub-issues: #{s1}, #{s2})
+- [x] #{issue_2} {タイトル} (Blocked by #{issue_1}) (Sub-issues: #{s3})
 
 ### リンク状態
 - 全 {n} 件のIssueがEpicにリンク済み
 - 全 {m} 件のSub-issueが各親Issueにリンク済み
-
-### 依存関係
-- #{issue_2} は #{issue_1} にブロックされている
-- #{issue_3} は #{issue_1}, #{issue_2} にブロックされている
-- #{issue_4} は #{issue_1}, #{issue_2} にブロックされている
 ```
+
+---
+
+## ラベル
+
+リポジトリにラベルがない場合、`scripts/create-github-labels.sh`で一括作成:
+
+```bash
+bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
+```
+
+| カテゴリ | ラベル | 説明 |
+|:--|:--|:--|
+| 種別 | `type:epic` | エピック/親Issue |
+| 種別 | `type:feature` | 新機能/機能追加 |
+| 種別 | `type:migration` | マイグレーション/移行 |
+| 種別 | `type:chore` | 雑務/設定 |
+| 種別 | `type:test` | テスト関連 |
+| 種別 | `type:docs` | ドキュメント関連 |
+| 領域 | `area:frontend` | フロントエンド |
+| 領域 | `area:server` | バックエンド/サーバ |
+| 領域 | `area:shared` | 共有/横断 |
+| 優先度 | `priority:P1` | 最優先（ブロッカー） |
+| 優先度 | `priority:P2` | 高優先度 |
+| 優先度 | `priority:P3` | 通常優先度 |
+| 規模 | `size:S` | 小（1日以内） |
+| 規模 | `size:M` | 中（1-3日） |
+| 規模 | `size:L` | 大（3日以上） |
 
 ## エラーハンドリング
 
@@ -467,10 +405,13 @@ Issue一覧のフォーマット（依存関係も記載）:
 | H1見出しがない | ファイル名をEpicタイトルとして使用 |
 | H2セクションがない | 警告を出し、Epic単体の作成を提案 |
 | `.spec-to-issues.yml`が不正 | YAML解析エラーを報告、デフォルトにフォールバック |
+| `.issues-plan.md`が既に存在 | 上書きするか確認 |
+| `.issues-plan.md`が見つからない | spec-analyzer-agentの実行を案内 |
+| `.issues-plan.md`のパース失敗 | エラー箇所を報告、フォーマット修正を案内 |
 | `gh` CLIが未認証 | `gh auth login` の実行を案内 |
 | ラベルが未作成 | `create-github-labels.sh` の実行を案内 |
 | Issue作成APIエラー | エラー報告、1回リトライ、それでも失敗ならユーザーに確認 |
-| GraphQL `addSubIssue`失敗 | 報告するが続行（Issue自体は存在するので手動リンクを案内） |
+| GraphQL `addSubIssue`失敗 | 報告するが続行（手動リンクを案内） |
 | Issue数が20件超 | 作成前にユーザーに確認 |
 | Sub-issue数が多すぎる（1 Issueあたり8件超） | 粒度の再検討を提案 |
 
