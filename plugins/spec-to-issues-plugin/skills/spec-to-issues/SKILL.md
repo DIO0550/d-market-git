@@ -9,8 +9,8 @@ description: 仕様書・設計書からGitHub Issueを自動生成するスキ�
 Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明示する。
 
 2つのエージェントで分担して実行する:
-- **spec-analyzer-agent**: 仕様書を解析し `.issues-plan.md` に分解計画を書き出す
-- **issues-creator-agent**: `.issues-plan.md` からGitHub Issueを作成する
+- **spec-analyzer-agent**: 仕様書を解析し `.spec-to-issues/issues-plan.md` に分解計画を書き出す
+- **issues-creator-agent**: `.spec-to-issues/issues-plan.md` からGitHub Issueを作成する
 
 ---
 
@@ -21,11 +21,11 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 ```
 1. MDファイルの読み込みと解析
    ↓
-2. ユーザー設定の確認（.spec-to-issues.yml）
+2. ユーザー設定の確認（.spec-to-issues/config.yml）
    ↓
 3. 3階層 + 依存関係の分解計画を作成
    ↓
-4. .issues-plan.md に書き出し
+4. .spec-to-issues/issues-plan.md に書き出し
 ```
 
 ### Step 1: MDファイルの読み込みと解析
@@ -103,14 +103,14 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 
 ### Step 2: ユーザー設定の確認
 
-プロジェクトルートに `.spec-to-issues.yml` が存在するか確認する。
+プロジェクトルートに `.spec-to-issues/config.yml` が存在するか確認する。
 
 - **設定ファイルがある場合**: 読み込んでカスタムルールを適用
-- **設定ファイルがない場合**: ユーザーに対話で質問して `.spec-to-issues.yml` を生成する
+- **設定ファイルがない場合**: ユーザーに対話で質問して `.spec-to-issues/config.yml` を生成する
 
 #### 対話セットアップ（設定ファイルがない場合）
 
-以下の質問をユーザーに行い、回答をもとに `.spec-to-issues.yml` を生成する。
+以下の質問をユーザーに行い、回答をもとに `.spec-to-issues/config.yml` を生成する。
 
 **重要: 各質問時に「設定しない場合はなしになります」と案内する。回答がなかった項目はymlに含めない（キーごと省略）。**
 
@@ -121,13 +121,13 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 5. **マイルストーン**: 設定するマイルストーン名　※設定しない場合なし
 6. **GitHub Project**: 紐付けるProject名　※設定しない場合なし
 
-回答があった項目のみ `.spec-to-issues.yml` に書き出す。全スキップの場合は空のymlを生成する。
+回答があった項目のみ `.spec-to-issues/config.yml` に書き出す。全スキップの場合は空のymlを生成する。
 
 設定スキーマの詳細は `references/config-schema.md` を参照。
 
-### Step 3: `.issues-plan.md` への書き出し
+### Step 3: `.spec-to-issues/issues-plan.md` への書き出し
 
-分解計画をプロジェクトルートの `.issues-plan.md` に書き出す。
+分解計画をプロジェクトルートの `.spec-to-issues/issues-plan.md` に書き出す。
 
 #### 出力フォーマット
 
@@ -213,7 +213,7 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 ### ワークフロー
 
 ```
-1. .issues-plan.md の読み込みとパース
+1. .spec-to-issues/issues-plan.md の読み込みとパース
    ↓
 2. ユーザーに確認・承認
    ↓
@@ -234,9 +234,9 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 10. 完了サマリー報告
 ```
 
-### Step 1: `.issues-plan.md` の読み込みとパース
+### Step 1: `.spec-to-issues/issues-plan.md` の読み込みとパース
 
-プロジェクトルートの `.issues-plan.md` を読み込み、以下を抽出する:
+プロジェクトルートの `.spec-to-issues/issues-plan.md` を読み込み、以下を抽出する:
 
 - **Epic**: タイトル、ラベル
 - **Issues**: 各Issueのタイトル、ラベル、依存関係（blocked_by）、本文
@@ -333,7 +333,7 @@ gh api graphql -f query='
 
 ### Step 7: Sub-issue作成
 
-各Issueに対して `.issues-plan.md` に定義されたSub-issueを作成。
+各Issueに対して `.spec-to-issues/issues-plan.md` に定義されたSub-issueを作成。
 タイトルは親Issueのプレフィックスを引き継ぐ。
 
 ```bash
@@ -419,10 +419,10 @@ bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
 | MDファイルが空 | エラー報告、処理中止 |
 | H1見出しがない | ファイル名をEpicタイトルとして使用 |
 | H2セクションがない | 警告を出し、Epic単体の作成を提案 |
-| `.spec-to-issues.yml`が不正 | YAML解析エラーを報告、デフォルトにフォールバック |
-| `.issues-plan.md`が既に存在 | 上書きするか確認 |
-| `.issues-plan.md`が見つからない | spec-analyzer-agentの実行を案内 |
-| `.issues-plan.md`のパース失敗 | エラー箇所を報告、フォーマット修正を案内 |
+| `.spec-to-issues/config.yml`が不正 | YAML解析エラーを報告、デフォルトにフォールバック |
+| `.spec-to-issues/issues-plan.md`が既に存在 | 上書きするか確認 |
+| `.spec-to-issues/issues-plan.md`が見つからない | spec-analyzer-agentの実行を案内 |
+| `.spec-to-issues/issues-plan.md`のパース失敗 | エラー箇所を報告、フォーマット修正を案内 |
 | `gh` CLIが未認証 | `gh auth login` の実行を案内 |
 | ラベルが未作成 | `create-github-labels.sh` の実行を案内 |
 | Issue作成APIエラー | エラー報告、1回リトライ、それでも失敗ならユーザーに確認 |

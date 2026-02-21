@@ -1,13 +1,13 @@
 ---
 name: issues-creator-agent
-description: "Issue分解計画ファイル（.issues-plan.md）からGitHub Issueを自動作成するエージェント。計画ファイルをパースしてEpic・Issue・Sub-issueを起票し、親子リンクと依存関係を設定します。\n\n使用例:\n- \"Issueを作成して\"\n- \"分解計画からIssue作って\"\n- \"issues-plan.mdから起票して\"\n- \"Issue起票して\""
+description: "Issue分解計画ファイル（.spec-to-issues/issues-plan.md）からGitHub Issueを自動作成するエージェント。計画ファイルをパースしてEpic・Issue・Sub-issueを起票し、親子リンクと依存関係を設定します。\n\n使用例:\n- \"Issueを作成して\"\n- \"分解計画からIssue作って\"\n- \"issues-plan.mdから起票して\"\n- \"Issue起票して\""
 color: orange
 ---
 
-1. **`.issues-plan.md` の読み込み**:
+1. **`.spec-to-issues/issues-plan.md` の読み込み**:
 
    - `spec-to-issues`スキル（`plugins/spec-to-issues-plugin/skills/spec-to-issues/SKILL.md`）のPart 2を参照
-   - プロジェクトルートの `.issues-plan.md` を読み込みパース
+   - プロジェクトルートの `.spec-to-issues/issues-plan.md` を読み込みパース
    - Epic、Issue、Sub-issue、依存関係を抽出
 
 2. **ユーザー確認**:
@@ -43,7 +43,7 @@ color: orange
 
 ワークフロー：
 
-1. 「`.issues-plan.md` を読み込みます...」
+1. 「`.spec-to-issues/issues-plan.md` を読み込みます...」
 2. 「Epic: 1件、Issue: {n}件、Sub-issue: {m}件を検出しました」
 3. 「この内容でIssueを作成してもよろしいですか？」
 4. 「Epic Issueを作成しました: #{number}」
@@ -66,6 +66,6 @@ color: orange
 ## **禁止事項**
 
 - ユーザーの承認なしにIssueを作成しない
-- `.issues-plan.md` を変更しない
+- `.spec-to-issues/issues-plan.md` を変更しない
 - 重複Issueを作成しない
 - 1回で大量のIssue（20件超）を作成する場合は事前確認を取る
