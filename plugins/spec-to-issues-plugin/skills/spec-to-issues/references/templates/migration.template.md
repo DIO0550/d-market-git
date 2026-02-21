@@ -13,11 +13,6 @@
 
 {migration_details}
 
-## 範囲
-
-- 対象モジュール/ファイル: {target_modules}
-- 対象外: {out_of_scope}
-
 ## タスク
 
 {task_checklist}
@@ -26,6 +21,10 @@
 
 - リスク: {risks}
 - ロールバック手順: {rollback_steps}
+
+## 依存関係
+
+- Blocked by: {blocked_by_issues}
 
 ## 関連
 

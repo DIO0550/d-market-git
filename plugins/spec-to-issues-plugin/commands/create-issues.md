@@ -2,7 +2,7 @@
 
 ## Description
 
-仕様書・設計書のMDファイルからGitHub Issueを自動生成します。
+仕様書・設計書のMDファイルからGitHub Issueを自動生成します。Epic → Issue → Sub-issue の3階層構成。
 
 ## Prompt Template
 
@@ -23,18 +23,22 @@
 
 3. **Issue分解計画の作成と確認**
 
-   - MDファイルの内容を分析し、Issue分解計画を作成
+   - MDファイルの内容を分析し、3階層（Epic + Issue + Sub-issue）の分解計画を作成
+   - Issue間の依存関係（Blocked by）を明示
    - ユーザーに計画を提示し、承認を得る
 
 4. **Issue作成**
 
    - Epic Issueを作成
-   - 子Issueを1つずつ作成（TaskCreateで進捗管理）
-   - 親子リンクをGraphQL APIで設定
+   - Issueを依存関係順に1つずつ作成（TaskCreateで進捗管理）
+   - Epic ← Issue の親子リンクをGraphQL APIで設定
+   - 各IssueにSub-issueを作成
+   - Issue ← Sub-issue の親子リンクをGraphQL APIで設定
 
 5. **完了報告**
 
-   - 作成したIssueのサマリーを報告
+   - 作成したIssue・Sub-issueのサマリーを報告
+   - 依存関係とリンク状態を確認
 
 ## Notes
 

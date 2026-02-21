@@ -17,15 +17,9 @@
 
 {update_details}
 
-## アウトライン
+## 依存関係
 
-{outline}
-
-## 受け入れ条件
-
-- [ ] ドキュメント作成/更新完了
-- [ ] レビュー完了
-- [ ] リンク共有済み
+- Blocked by: {blocked_by_issues}
 
 ## 関連
 

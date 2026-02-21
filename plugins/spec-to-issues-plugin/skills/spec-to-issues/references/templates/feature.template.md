@@ -9,23 +9,13 @@
 - 元仕様書: `{md_file_path}`
 - 親Epic: #{epic_number}
 
-## 機能要件
-
-{requirements}
-
-## 仕様
-
-- 入力: {input_spec}
-- 出力: {output_spec}
-- エラーモード: {error_modes}
-
 ## タスク
 
 {task_checklist}
 
-## 受け入れ条件
+## 依存関係
 
-{acceptance_criteria}
+- Blocked by: {blocked_by_issues}
 
 ## 関連
 

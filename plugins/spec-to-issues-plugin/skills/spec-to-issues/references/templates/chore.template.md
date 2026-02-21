@@ -13,9 +13,9 @@
 
 {task_checklist}
 
-## 期待効果
+## 依存関係
 
-{expected_effects}
+- Blocked by: {blocked_by_issues}
 
 ## 関連
 

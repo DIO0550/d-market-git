@@ -64,8 +64,11 @@ templates:
 # Issue分解の設定
 decomposition:
   max_days_per_issue: 3                       # 1 Issueあたりの最大作業日数（超えたら分割推奨）
+  max_days_per_sub_issue: 1                   # 1 Sub-issueあたりの最大作業日数
   min_issues: 2                               # 最小Issue数（少なすぎる場合は警告）
   max_issues: 20                              # 最大Issue数（多すぎる場合は確認）
+  min_sub_issues_per_issue: 1                 # 1 Issueあたりの最小Sub-issue数
+  max_sub_issues_per_issue: 8                 # 1 Issueあたりの最大Sub-issue数（超えたら粒度再検討）
 
 # Assignee設定
 assignees:
@@ -95,8 +98,11 @@ project: ""                                   # GitHub Projectの名前または
 | `labels.defaults.priority` | `priority:P2` |
 | `labels.defaults.size` | `size:M` |
 | `decomposition.max_days_per_issue` | `3` |
+| `decomposition.max_days_per_sub_issue` | `1` |
 | `decomposition.min_issues` | `2` |
 | `decomposition.max_issues` | `20` |
+| `decomposition.min_sub_issues_per_issue` | `1` |
+| `decomposition.max_sub_issues_per_issue` | `8` |
 | `assignees.default` | (なし) |
 | `milestone` | (なし) |
 | `project` | (なし) |
