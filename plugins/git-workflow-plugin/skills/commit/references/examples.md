@@ -54,23 +54,18 @@
 
 ## Issue連携の例
 
-### Issueを解決する場合
+### Issue番号を含める場合
 
 ```
-✨ [New Feature]: ブロックボタンをランキングページに追加
+✨ [New Feature]: #123 ブロックボタンをランキングページに追加
 
 ユーザーをブロックしてコンテンツを非表示にできる機能。
-
-Closes #123
 ```
 
 ### 複数Issueに関連する場合
 
 ```
-♻️ [Refactoring]: 認証ロジックをAuthServiceに集約
-
-Refs #45
-Refs #67
+♻️ [Refactoring]: #45 #67 認証ロジックをAuthServiceに集約
 ```
 
 ## 判断基準
