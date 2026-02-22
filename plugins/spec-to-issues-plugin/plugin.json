@@ -1,0 +1,10 @@
+{
+  "name": "spec-to-issues-plugin",
+  "version": "1.0.0",
+  "description": "仕様書からGitHub Issueを自動生成するプラグイン（分析エージェント + 作成エージェントの2段階構成）",
+  "author": {
+    "name": "DIO0550"
+  },
+  "repository": "https://github.com/DIO0550/d-market",
+  "license": "MIT"
+}

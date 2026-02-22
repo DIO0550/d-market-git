@@ -34,11 +34,9 @@
 
    形式:
    ```
-   <type>: <subject>
+   <type>: #<Issue番号> <subject>
 
    [本文（任意）]
-
-   [Closes #123 / Refs #123]
    ```
 
    タイプ一覧:
@@ -62,5 +60,5 @@
 
 - 複数の目的の変更は分割してコミット
 - 曖昧なメッセージ（「修正」「対応」など）は禁止
-- 関連Issueがあれば `Closes #123` または `Refs #123` を記載
+- 関連Issueがあればsubject行に `#123` のようにIssue番号を記載
 - 詳細は `references/examples.md` を参照
