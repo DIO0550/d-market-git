@@ -1,6 +1,9 @@
 ---
 name: pr-fix-review
 description: PRのレビュー指摘修正スキル。未解決のレビューコメントを確認し、1つずつ順番に修正してコミットし、スレッドを解決済みにする。「レビュー指摘を直して」「レビュー対応して」などのリクエスト時に使用。
+disable-model-invocation: true
+allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write
+argument-hint: [PR番号]
 ---
 
 # レビュー指摘修正

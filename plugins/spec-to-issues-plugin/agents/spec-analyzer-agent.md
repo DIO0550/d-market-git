@@ -12,7 +12,7 @@ color: green
 
 2. **MDファイルの読み込みと解析**:
 
-   - `spec-to-issues`スキル（`plugins/spec-to-issues-plugin/skills/spec-to-issues/SKILL.md`）のPart 1を参照して解析ルールを確認
+   - `spec-to-issues` スキルのPart 1を参照して解析ルールを確認
    - 指定されたMDファイルを読み込み
    - ドキュメント構造（見出し、セクション、リスト）を解析
    - H2 → Issue候補、H3 → Sub-issue候補として分類

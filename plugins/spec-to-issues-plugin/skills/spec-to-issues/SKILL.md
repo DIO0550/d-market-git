@@ -1,6 +1,9 @@
 ---
 name: spec-to-issues
 description: 仕様書・設計書からGitHub Issueを自動生成するスキル。仕様書を解析してEpic・Issue・Sub-issueの3階層に分解し、依存関係を明示してGitHub Issuesとして起票する。「仕様書からIssue作成」「仕様書からIssue作って」「設計書をIssueに変換して」「specからIssue生成」などのリクエスト時に使用。
+disable-model-invocation: true
+allowed-tools: Bash(gh *), Read, Write, Glob, Grep
+argument-hint: [仕様書MDファイルパス]
 ---
 
 # Spec to Issues

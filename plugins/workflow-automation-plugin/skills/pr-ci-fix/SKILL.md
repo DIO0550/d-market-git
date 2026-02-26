@@ -1,6 +1,9 @@
 ---
 name: pr-ci-fix
 description: PRのCIエラー修正スキル。ビルドエラー・テスト失敗・Lint/型エラーを確認し、1つずつ順番に修正してコミットする。「CIエラー修正」「CI直して」「テスト失敗を修正」などのリクエスト時に使用。
+disable-model-invocation: true
+allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write
+argument-hint: [PR番号]
 ---
 
 # CIエラー修正

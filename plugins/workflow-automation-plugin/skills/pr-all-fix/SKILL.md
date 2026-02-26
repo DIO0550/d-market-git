@@ -1,6 +1,9 @@
 ---
 name: pr-all-fix
 description: PRのCIエラーとレビュー指摘を一括修正するスキル。CIエラーを先に修正し、次にレビュー指摘を処理する。「PR全部直して」「CIもレビューも直して」などのリクエスト時に使用。
+disable-model-invocation: true
+allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write
+argument-hint: [PR番号]
 ---
 
 # PR問題修正

@@ -1,6 +1,7 @@
 ---
 name: pull-request
 description: プルリクエスト作成スキル。PRテンプレートに基づいた説明文の作成、変更種類の分類、チェックリストの確認を支援。「PR作成」「プルリクエスト」「レビュー依頼」などのリクエスト時に使用。
+allowed-tools: Bash(git *), Bash(gh pr *)
 ---
 
 # プルリクエスト作成

@@ -1,6 +1,8 @@
 ---
 name: commit-template
 description: コミットメッセージテンプレート生成スキル。プロジェクトに配置するYAML形式のコミットテンプレートファイルを生成する。「コミットテンプレートを作成」「テンプレート生成」などのリクエスト時に使用。
+disable-model-invocation: true
+allowed-tools: Read, Write, Glob
 ---
 
 # コミットテンプレート生成

@@ -6,7 +6,7 @@ color: orange
 
 1. **`.spec-to-issues/issues-plan.md` の読み込み**:
 
-   - `spec-to-issues`スキル（`plugins/spec-to-issues-plugin/skills/spec-to-issues/SKILL.md`）のPart 2を参照
+   - `spec-to-issues` スキルのPart 2を参照
    - プロジェクトルートの `.spec-to-issues/issues-plan.md` を読み込みパース
    - Epic、Issue、Sub-issue、依存関係を抽出
 

@@ -6,8 +6,8 @@ color: green
 
 1. **PR ルールとテンプレートの確認**:
 
-   - `pull-request` スキル（`plugins/git-workflow-plugin/skills/pull-request/SKILL.md`）を参照してプロジェクトの PR 規約を取得
-   - `plugins/git-workflow-plugin/skills/pull-request/references/pr-template.md` テンプレートを参照
+   - `pull-request` スキルを参照してプロジェクトの PR 規約を取得
+   - スキル内の `references/pr-template.md` テンプレートを参照
    - プロジェクト固有の PR ルールやガイドラインを確認
 
 2. **現在のブランチと変更内容の分析**:
