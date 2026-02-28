@@ -3,18 +3,32 @@ name: pr-review
 description: コードレビュースキル。PR番号またはブランチ名を指定して、差分コードの総合レビューを実施しGitHubにレビューコメントを投稿する。「レビューして」「コードレビュー」「PRをレビュー」「ブランチのレビュー」などのリクエスト時に使用。
 disable-model-invocation: true
 allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob
-argument-hint: [PR番号 or ブランチ名]
+argument-hint: [PR番号 or ブランチ名（省略可）]
 ---
 
 # コードレビュー
 
 PR番号またはブランチ名から差分を取得し、プロジェクト規約に基づいた総合レビューを行い、GitHubにレビューコメントを投稿する。
 
-## PRコンテキスト（自動取得）
+## PR特定
 
-- PR情報: !`gh pr view "$0" --json number,title,body,baseRefName,headRefName 2>/dev/null || echo "PR情報の取得に失敗。引数を確認してください: $0"`
-- 変更ファイル一覧: !`gh pr diff "$0" --name-only 2>/dev/null`
-- diff: !`gh pr diff "$0" 2>/dev/null`
+### 引数ありの場合
+
+以下の自動取得データを使用する。
+
+- PR情報: !`[ -n "$0" ] && gh pr view "$0" --json number,title,body,baseRefName,headRefName 2>/dev/null || true`
+- 変更ファイル一覧: !`[ -n "$0" ] && gh pr diff "$0" --name-only 2>/dev/null || true`
+- diff: !`[ -n "$0" ] && gh pr diff "$0" 2>/dev/null || true`
+
+### 引数なしの場合
+
+オープン中のPR一覧を取得してユーザーに選択させる。
+
+```bash
+gh pr list --state open --json number,title,headRefName --template '{{range .}}#{{.number}} {{.title}} ({{.headRefName}}){{"\n"}}{{end}}'
+```
+
+番号とタイトルの一覧をユーザーに提示し、レビュー対象を選んでもらう。ユーザーが選択したPR番号で `gh pr view` / `gh pr diff` を実行して以降のワークフローに進む。
 
 ## ワークフロー
 
