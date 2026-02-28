@@ -1,24 +1,29 @@
 ---
 name: pr-review
-description: コードレビュースキル。PR番号またはブランチ名を指定して、差分コードの総合レビューを実施しGitHubにレビューコメントを投稿する。「レビューして」「コードレビュー」「PRをレビュー」「ブランチのレビュー」などのリクエスト時に使用。
+description: コードレビュースキル。PR番号・ブランチ名・PR URLを指定して、差分コードの総合レビューを実施しGitHubにレビューコメントを投稿する。「レビューして」「コードレビュー」「PRをレビュー」「このPR見て」などのリクエスト時に使用。URLを渡せばローカルにリポジトリがなくてもレビュー可能。
 disable-model-invocation: true
 allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob
-argument-hint: [PR番号 or ブランチ名（省略可）]
+argument-hint: [PR番号 or ブランチ名 or PR URL（省略可）]
 ---
 
 # コードレビュー
 
-PR番号またはブランチ名から差分を取得し、プロジェクト規約に基づいた総合レビューを行い、GitHubにレビューコメントを投稿する。
+PR番号・ブランチ名・PR URLから差分を取得し、プロジェクト規約に基づいた総合レビューを行い、GitHubにレビューコメントを投稿する。ローカルにリポジトリがなくてもURL指定でレビュー可能。
 
 ## PR特定
 
 ### 引数ありの場合
 
-以下の自動取得データを使用する。
+`gh` コマンドはPR番号・ブランチ名・URLのいずれも受け付けるため、`$0` をそのまま渡す。
 
-- PR情報: !`[ -n "$0" ] && gh pr view "$0" --json number,title,body,baseRefName,headRefName 2>/dev/null || true`
+- PR情報: !`[ -n "$0" ] && gh pr view "$0" --json number,title,body,baseRefName,headRefName,url 2>/dev/null || true`
 - 変更ファイル一覧: !`[ -n "$0" ] && gh pr diff "$0" --name-only 2>/dev/null || true`
 - diff: !`[ -n "$0" ] && gh pr diff "$0" 2>/dev/null || true`
+
+入力例:
+- `/pr-review 123` — PR番号
+- `/pr-review feature/add-login` — ブランチ名
+- `/pr-review https://github.com/owner/repo/pull/123` — PR URL
 
 ### 引数なしの場合
 
@@ -30,14 +35,25 @@ gh pr list --state open --json number,title,headRefName --template '{{range .}}#
 
 番号とタイトルの一覧をユーザーに提示し、レビュー対象を選んでもらう。ユーザーが選択したPR番号で `gh pr view` / `gh pr diff` を実行して以降のワークフローに進む。
 
+### owner/repo/numberの取得
+
+GitHubへの投稿時に必要な `owner`・`repo`・`pr_number` は、PR情報のJSONから取得する。URLが渡された場合やローカルリポジトリがない場合でも、`gh pr view` の結果から確実に取得できる。
+
+```bash
+# PR情報からURLを取得し、owner/repo/numberを抽出
+gh pr view "$0" --json url --jq '.url'
+# 例: https://github.com/owner/repo/pull/123 → owner, repo, 123
+```
+
 ## ワークフロー
 
 ```
 1. 上記の自動取得データを確認（取得失敗時はユーザーに報告して中断）
    ↓
-2. プロジェクト規約の収集（CLAUDE.md、lint設定、tsconfig等）
+2. ローカルリポジトリの有無を判定
    ↓
-3. 変更ファイルの全文読み込み（差分だけでなくコンテキストを理解）
+3a. [ローカルあり] プロジェクト規約の収集 → 変更ファイルの全文読み込み
+3b. [ローカルなし] diffのみでレビュー（規約収集・ファイル読み込みスキップ）
    ↓
 4. レビュー観点ごとに分析
    ↓
@@ -46,7 +62,14 @@ gh pr list --state open --json number,title,headRefName --template '{{range .}}#
 6. 承認後、GitHubにレビュー投稿
 ```
 
-## プロジェクト規約の収集
+## ローカルリポジトリの判定
+
+PR URLが渡された場合など、ローカルにリポジトリがない可能性がある。以下で判定する:
+
+- 現在のディレクトリがgitリポジトリであり、かつPRのリポジトリと一致する → **ローカルあり**
+- それ以外 → **ローカルなし**（diffベースのレビューのみ実施）
+
+## プロジェクト規約の収集（ローカルありの場合のみ）
 
 レビューの精度を高めるため、プロジェクト固有のルールや規約を事前に収集する。以下のファイルが存在する場合は読み込む。
 
@@ -62,13 +85,15 @@ gh pr list --state open --json number,title,headRefName --template '{{range .}}#
 
 全ファイルを必ず読む必要はない。変更対象の言語・技術スタックに関連するものだけ読み込む。
 
-## 変更ファイルの読み込み
+## 変更ファイルの読み込み（ローカルありの場合のみ）
 
 diffだけでは文脈を把握できないため、変更があったファイルの全文を読み込む。
 
 - 変更ファイルが多い場合（10ファイル以上）は、主要な変更ファイルを優先して読む
 - テストファイルや設定ファイルの変更は、対応する実装ファイルとセットで読む
 - 新規ファイルはdiffに全文含まれるため、別途読み込み不要
+
+ローカルなしの場合はこのステップをスキップし、diffの情報のみでレビューする。
 
 ## レビュー観点
 
