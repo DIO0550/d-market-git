@@ -7,7 +7,9 @@ color: green
 1. **PR ルールとテンプレートの確認**:
 
    - `pull-request` スキルを参照してプロジェクトの PR 規約を取得
-   - スキル内の `references/pr-template.md` テンプレートを参照
+   - まずプロジェクト内の `.pr-templates/.pr-template.yml` を参照
+   - プロジェクト内テンプレートがない場合は `references/pr-template.md` を参照
+   - 必要に応じて `pr-template` スキルで `.pr-templates/.pr-template.yml` の生成を提案
    - プロジェクト固有の PR ルールやガイドラインを確認
 
 2. **現在のブランチと変更内容の分析**:

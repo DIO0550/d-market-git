@@ -1,0 +1,107 @@
+title_format: "<emoji> [<tag>]: #<issue> <subject>"
+
+types:
+  basic:
+    - emoji: "🐛"
+      tag: "Bug Fix"
+      description: "バグ修正"
+    - emoji: "✨"
+      tag: "New Feature"
+      description: "新機能"
+    - emoji: "♻️"
+      tag: "Refactoring"
+      description: "リファクタリング"
+    - emoji: "🎨"
+      tag: "UI/UX"
+      description: "UI/UX改善"
+    - emoji: "🚀"
+      tag: "Performance"
+      description: "パフォーマンス改善"
+    - emoji: "🧪"
+      tag: "Tests"
+      description: "テスト追加/修正"
+    - emoji: "📝"
+      tag: "Doc"
+      description: "ドキュメント更新"
+    - emoji: "🔧"
+      tag: "Config"
+      description: "設定変更"
+    - emoji: "🔥"
+      tag: "Remove"
+      description: "削除"
+    - emoji: "💥"
+      tag: "Breaking"
+      description: "破壊的変更"
+
+body_sections:
+  - key: "summary"
+    title: "概要"
+    required: true
+    prompt: "このPRで何を変更したかを1-3行で記載"
+  - key: "change_type"
+    title: "変更の種類"
+    required: true
+    prompt: "types から該当するものを選択"
+  - key: "details_added"
+    title: "追加した内容"
+    required: false
+    prompt: "新規追加した機能やファイル"
+  - key: "details_changed"
+    title: "変更した内容"
+    required: true
+    prompt: "既存機能への変更点"
+  - key: "details_removed"
+    title: "削除した内容"
+    required: false
+    prompt: "削除した機能やファイル"
+  - key: "issues"
+    title: "関連Issue"
+    required: true
+    prompt: "Closes/Fixes/Refs などのキーワードで記載"
+  - key: "tests"
+    title: "テスト"
+    required: true
+    prompt: "実行したテストと結果を記載"
+  - key: "review_points"
+    title: "レビューポイント"
+    required: false
+    prompt: "レビュアーに重点的に見てほしい点"
+
+rules:
+  issue_link:
+    required: true
+    close_keywords:
+      - "Closes"
+      - "Fixes"
+    reference_keywords:
+      - "Refs"
+      - "Relates to"
+  title:
+    include_type: true
+    include_issue: true
+    max_length: 72
+  quality_gate:
+    require_summary: true
+    require_test_result: true
+    require_review_points_when_complex: true
+  forbidden:
+    vague_titles:
+      - "修正"
+      - "対応"
+      - "調整"
+      - "更新"
+      - "fix"
+      - "update"
+
+checklist:
+  - "セルフレビューを実施した"
+  - "必要なテストを実施した"
+  - "必要なドキュメントを更新した（必要時）"
+  - "関連IssueをPRにリンクした"
+  - "破壊的変更がある場合は明記した"
+
+examples:
+  - title: "✨ [New Feature]: #123 ユーザ検索にロール絞り込みを追加"
+    summary: "ユーザ一覧画面にロールフィルタを追加し、検索条件を保存するように変更。"
+  - title: "🐛 [Bug Fix]: #456 Safariで画像アップロードが失敗する不具合を修正"
+    summary: "FormData生成処理のcontent-type指定を修正し、Safariでも正常に送信できるようにした。"

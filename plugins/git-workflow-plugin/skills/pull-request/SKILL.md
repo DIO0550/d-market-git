@@ -1,12 +1,21 @@
 ---
 name: pull-request
 description: プルリクエスト作成スキル。PRテンプレートに基づいた説明文の作成、変更種類の分類、チェックリストの確認を支援。「PR作成」「プルリクエスト」「レビュー依頼」などのリクエスト時に使用。
-allowed-tools: Bash(git *), Bash(gh pr *)
+allowed-tools: Bash(git *), Bash(gh pr *), Read, Glob
 ---
 
 # プルリクエスト作成
 
 PRテンプレートに沿ったプルリクエスト説明文の作成を支援するスキル。
+
+## テンプレート参照順序
+
+PR本文を作成する際は、以下の順でテンプレートを参照する。
+
+1. `.pr-templates/.pr-template.yml`
+2. `references/pr-template.md`（フォールバック）
+
+`.pr-templates/.pr-template.yml` がある場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
 
 ## 基本構成
 
@@ -55,4 +64,4 @@ PR作成前の確認事項:
 - [ ] セルフレビュー実施
 - [ ] 破壊的変更の明記（該当時）
 
-詳細なテンプレートは `references/pr-template.md` を参照。
+デフォルトテンプレートは `references/pr-template.md` を参照。
