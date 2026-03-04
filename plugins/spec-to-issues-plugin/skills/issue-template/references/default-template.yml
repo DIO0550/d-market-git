@@ -1,0 +1,375 @@
+# Issue テンプレート定義
+# spec-to-issues スキルがIssue作成時に参照するフォーマット
+
+# タイトルフォーマット
+# プレースホルダー: {title}, {area}, {component}, {summary}, {suffix}
+title_formats:
+  epic: "[Epic] {title}: {suffix}"
+  feature: "[Feature][{area}] {component}: {summary}"
+  bug: "[Bug][{area}] {summary}"
+  migration: "[Migration] {summary}"
+  test: "[Test] {summary}"
+  docs: "[Docs] {summary}"
+  chore: "[Chore] {summary}"
+
+# Epic設定
+epic:
+  suffix: "実装計画と進行管理"
+  body_sections:
+    - key: overview
+      title: "概要"
+      required: true
+      prompt: "Epicの目的と背景を記載"
+    - key: issue_list
+      title: "Issue一覧"
+      required: true
+      prompt: "（Issue作成後に自動更新）"
+    - key: acceptance_criteria
+      title: "完了条件"
+      required: false
+      prompt: "Epic全体の完了条件を記載"
+
+# Issueタイプ定義
+types:
+  - name: feature
+    label: "type:feature"
+    description: "新機能・機能追加"
+    detection_keywords:
+      - "新機能"
+      - "コンポーネント設計"
+      - "画面実装"
+      - "機能追加"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "この機能の目的と背景を記載"
+      - key: tasks
+        title: "タスク"
+        required: true
+        format: "checklist"
+        prompt: "実装タスクをチェックリスト形式で記載"
+      - key: acceptance_criteria
+        title: "受け入れ条件"
+        required: true
+        format: "checklist"
+        prompt: "完了と見なす条件をチェックリスト形式で記載"
+      - key: dependencies
+        title: "依存関係"
+        required: false
+        prompt: "Blocked by や関連Issueを記載"
+      - key: notes
+        title: "備考"
+        required: false
+        prompt: "技術的な補足やデザイン参照など"
+
+  - name: bug
+    label: "type:bug"
+    description: "バグ報告・不具合修正"
+    detection_keywords:
+      - "バグ"
+      - "不具合"
+      - "エラー"
+      - "障害"
+      - "クラッシュ"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "バグの概要を記載"
+      - key: reproduce_steps
+        title: "再現手順"
+        required: true
+        format: "numbered_list"
+        prompt: "バグを再現するための手順を記載"
+      - key: expected
+        title: "期待する動作"
+        required: true
+        prompt: "本来あるべき正しい動作を記載"
+      - key: actual
+        title: "実際の動作"
+        required: true
+        prompt: "現在発生している問題の動作を記載"
+      - key: environment
+        title: "環境"
+        required: false
+        prompt: "OS、ブラウザ、バージョン等を記載"
+      - key: tasks
+        title: "タスク"
+        required: false
+        format: "checklist"
+        prompt: "修正タスクをチェックリスト形式で記載"
+
+  - name: migration
+    label: "type:migration"
+    description: "マイグレーション・移行作業"
+    detection_keywords:
+      - "DB変更"
+      - "スキーマ移行"
+      - "API移行"
+      - "リファクタリング"
+      - "データ移行"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "移行の目的と範囲を記載"
+      - key: current_state
+        title: "現状"
+        required: true
+        prompt: "現在の状態や構成を記載"
+      - key: target_state
+        title: "移行後の状態"
+        required: true
+        prompt: "移行完了後のあるべき状態を記載"
+      - key: tasks
+        title: "タスク"
+        required: true
+        format: "checklist"
+        prompt: "移行手順をチェックリスト形式で記載"
+      - key: rollback
+        title: "ロールバック手順"
+        required: false
+        prompt: "問題発生時の戻し手順を記載"
+      - key: dependencies
+        title: "依存関係"
+        required: false
+        prompt: "Blocked by や関連Issueを記載"
+
+  - name: test
+    label: "type:test"
+    description: "テスト追加・テスト改善"
+    detection_keywords:
+      - "テスト戦略"
+      - "テストケース"
+      - "品質基準"
+      - "E2E"
+      - "ユニットテスト"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "テストの目的と対象範囲を記載"
+      - key: test_targets
+        title: "テスト対象"
+        required: true
+        prompt: "テスト対象のコンポーネントや機能を記載"
+      - key: test_cases
+        title: "テストケース"
+        required: true
+        format: "checklist"
+        prompt: "テストケースをチェックリスト形式で記載"
+      - key: tasks
+        title: "タスク"
+        required: false
+        format: "checklist"
+        prompt: "実装タスクをチェックリスト形式で記載"
+
+  - name: docs
+    label: "type:docs"
+    description: "ドキュメント作成・更新"
+    detection_keywords:
+      - "ドキュメント作成"
+      - "README更新"
+      - "API仕様書"
+      - "手順書"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "ドキュメントの目的と対象読者を記載"
+      - key: scope
+        title: "対象範囲"
+        required: true
+        prompt: "作成・更新するドキュメントの範囲を記載"
+      - key: tasks
+        title: "タスク"
+        required: true
+        format: "checklist"
+        prompt: "ドキュメント作成タスクをチェックリスト形式で記載"
+
+  - name: chore
+    label: "type:chore"
+    description: "雑務・設定・メンテナンス"
+    detection_keywords:
+      - "CI/CD"
+      - "ツール設定"
+      - "依存更新"
+      - "リント設定"
+      - "設定変更"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "作業の目的と内容を記載"
+      - key: tasks
+        title: "タスク"
+        required: true
+        format: "checklist"
+        prompt: "作業タスクをチェックリスト形式で記載"
+      - key: impact
+        title: "影響範囲"
+        required: false
+        prompt: "この変更が影響するコンポーネントや機能を記載"
+
+# ラベル体系
+labels:
+  # 種別ラベル（typesのlabelフィールドで自動定義）
+  type:
+    - name: "type:epic"
+      description: "エピック/親Issue"
+      color: "6F42C1"
+    - name: "type:feature"
+      description: "新機能/機能追加"
+      color: "0075CA"
+    - name: "type:bug"
+      description: "バグ報告/不具合修正"
+      color: "D73A4A"
+    - name: "type:migration"
+      description: "マイグレーション/移行"
+      color: "E4E669"
+    - name: "type:test"
+      description: "テスト関連"
+      color: "BFD4F2"
+    - name: "type:docs"
+      description: "ドキュメント関連"
+      color: "0075CA"
+    - name: "type:chore"
+      description: "雑務/設定"
+      color: "EDEDED"
+
+  # エリアラベル
+  area:
+    - name: "area:frontend"
+      description: "フロントエンド"
+      color: "61DAFB"
+      keywords:
+        - "UI"
+        - "component"
+        - "page"
+        - "screen"
+        - "CSS"
+        - "React"
+        - "Vue"
+        - "Next.js"
+    - name: "area:server"
+      description: "バックエンド/サーバ"
+      color: "68A063"
+      keywords:
+        - "API"
+        - "endpoint"
+        - "database"
+        - "server"
+        - "handler"
+        - "middleware"
+    - name: "area:shared"
+      description: "共有/横断"
+      color: "F9D0C4"
+      keywords:
+        - "shared"
+        - "common"
+        - "utils"
+        - "types"
+        - "interface"
+        - "schema"
+
+  # 優先度ラベル
+  priority:
+    - name: "priority:P1"
+      description: "最優先（ブロッカー）"
+      color: "B60205"
+    - name: "priority:P2"
+      description: "高優先度"
+      color: "D93F0B"
+    - name: "priority:P3"
+      description: "通常優先度"
+      color: "FBCA04"
+
+  # サイズラベル
+  size:
+    - name: "size:S"
+      description: "小（1日以内）"
+      color: "C2E0C6"
+    - name: "size:M"
+      description: "中（1-3日）"
+      color: "FEF2C0"
+    - name: "size:L"
+      description: "大（3日以上）"
+      color: "F9D0C4"
+
+# 品質ルール
+rules:
+  # タイトル
+  title:
+    max_length: 80
+    require_type_prefix: true
+    forbidden_vague_titles:
+      - "修正"
+      - "対応"
+      - "調整"
+      - "更新"
+      - "fix"
+      - "update"
+
+  # 本文
+  body:
+    require_overview: true
+    require_task_checklist: true
+    require_acceptance_criteria_for:
+      - "feature"
+      - "migration"
+
+  # 粒度
+  granularity:
+    max_days_per_issue: 3
+    max_days_per_sub_issue: 1
+    min_sub_issues_per_issue: 1
+    max_sub_issues_per_issue: 8
+
+  # 依存関係
+  dependencies:
+    order:
+      - "データモデル → API → UI"
+      - "スキーマ変更 → マイグレーション → アプリコード"
+      - "共通コンポーネント → 個別画面"
+      - "機能実装 → テスト"
+      - "機能実装 → ドキュメント"
+
+# 例
+examples:
+  feature:
+    title: "[Feature][area:frontend] UserProfile: プロフィール編集画面を実装"
+    body: |
+      ## 概要
+      ユーザーが自分のプロフィール情報を編集できる画面を実装する。
+
+      ## タスク
+      - [ ] プロフィール編集フォームコンポーネントの作成
+      - [ ] バリデーションロジックの実装
+      - [ ] API連携の実装
+
+      ## 受け入れ条件
+      - [ ] 名前・メールアドレス・アバターが編集可能
+      - [ ] バリデーションエラーが適切に表示される
+      - [ ] 保存成功時にトースト通知が表示される
+
+  bug:
+    title: "[Bug][area:frontend] Safariで画像アップロードが失敗する"
+    body: |
+      ## 概要
+      Safari環境でプロフィール画像のアップロードが失敗する。
+
+      ## 再現手順
+      1. Safari 17.xでプロフィール編集画面を開く
+      2. アバター画像を選択してアップロード
+      3. エラートーストが表示される
+
+      ## 期待する動作
+      画像が正常にアップロードされ、プレビューが更新される。
+
+      ## 実際の動作
+      「アップロードに失敗しました」エラーが表示される。
+
+      ## 環境
+      - macOS Sonoma 14.x
+      - Safari 17.x

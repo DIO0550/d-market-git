@@ -1,6 +1,7 @@
 ---
 name: spec-to-issues
-description: 仕様書・設計書からGitHub Issueを自動生成するスキル。仕様書を解析してEpic・Issue・Sub-issueの3階層に分解し、依存関係を明示してGitHub Issuesとして起票する。「仕様書からIssue作成」「仕様書からIssue作って」「設計書をIssueに変換して」「specからIssue生成」などのリクエスト時に使用。
+description: 仕様書・設計書からGitHub Issueを自動生成する。Epic・Issue・Sub-issueの3階層に分解し、依存関係を明示して起票。ユーザーが明示的に呼び出した場合のみ使用。
+user-invocable: true
 disable-model-invocation: true
 allowed-tools: Bash(gh *), Read, Write, Glob, Grep
 argument-hint: [仕様書MDファイルパス]
@@ -14,6 +15,31 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 2つのエージェントで分担して実行する:
 - **spec-analyzer-agent**: 仕様書を解析し `.spec-to-issues/issues-plan.md` に分解計画を書き出す
 - **issues-creator-agent**: `.spec-to-issues/issues-plan.md` からGitHub Issueを作成する
+
+---
+
+## テンプレート解決の優先順位
+
+Issue本文・タイトル・ラベルのフォーマットは以下の優先順位で解決する:
+
+1. **`.spec-to-issues/issue-template.yml`**（プロジェクトカスタム）が存在する場合 → YAMLの定義を使用
+2. **`references/templates/*.template.md`**（ビルトインデフォルト）→ YAMLが存在しない場合のフォールバック
+
+### YAMLテンプレートが存在する場合の動作
+
+`.spec-to-issues/issue-template.yml` が見つかった場合:
+
+- **タイトル形式**: `title_formats` セクションのタイプ別フォーマットを使用
+- **Issue本文**: `types[].body_sections` の定義に従い、`required: true` のセクションは必ず含める。`format: "checklist"` のセクションはチェックリスト形式で出力
+- **ラベル**: `labels` セクションの定義を使用。`detection_keywords` でエリア自動判定
+- **品質ルール**: `rules` セクションのルールを適用（タイトル長、必須セクション等）
+- **Epic**: `epic` セクションの定義を使用
+
+### YAMLテンプレートが存在しない場合の動作
+
+`references/templates/*.template.md` をフォールバックとして使用する。この場合、タイトル形式やラベルはSKILL.md本文の定義に従う。
+
+`.spec-to-issues/issue-template.yml` は `issue-template` スキルで生成できる。
 
 ---
 
@@ -268,7 +294,9 @@ Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明
 
 ### Step 4: Epic Issue作成
 
-テンプレート: `references/templates/epic.template.md`
+テンプレート解決:
+- `.spec-to-issues/issue-template.yml` がある場合 → `epic` セクションと `title_formats.epic` を使用
+- ない場合 → `references/templates/epic.template.md` をフォールバック
 
 ```bash
 EPIC_URL=$(gh issue create \
@@ -291,7 +319,14 @@ EPIC_NUM=$(echo "$EPIC_URL" | grep -oE '[0-9]+$')
 `blocked_by` に基づいてトポロジカルソートし、依存元を先に作成。
 作成時に連番を実際のGitHub Issue番号に置換して本文に埋め込む。
 
-#### Issue種類とテンプレート
+#### Issue種類とテンプレート解決
+
+**YAMLテンプレートがある場合** (`.spec-to-issues/issue-template.yml`):
+- `types` 配列から該当タイプの `body_sections` を読み取り、本文を組み立てる
+- タイトルは `title_formats` から該当タイプのフォーマットを使用
+- ラベルは `labels` セクションから適用
+
+**YAMLテンプレートがない場合**（フォールバック）:
 
 | 種類 | テンプレート | ラベル |
 |:--|:--|:--|
