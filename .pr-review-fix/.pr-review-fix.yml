@@ -1,0 +1,9 @@
+# レビュー指摘修正の設定
+
+# スレッド解決時の返信設定
+resolve-reply:
+  # true: 解決時にスレッドへ返信する / false: 返信しない（デフォルト: false）
+  enabled: true
+  # 返信テンプレート（省略時はAIが指摘内容に応じて返信メッセージを生成する）
+  # 利用可能な変数: {commit_hash}
+  # template: "✅ {commit_hash} で修正しました"

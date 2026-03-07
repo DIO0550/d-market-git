@@ -59,6 +59,22 @@ PRのレビュー指摘事項とCIエラーを1つずつ修正するスキル。
 1. CIエラー（先に直すとレビュー対応がスムーズになることが多い）
 2. レビュー指摘事項
 
+## 設定ファイル
+
+プロジェクトに `.pr-review-fix/.pr-review-fix.yml` が存在する場合、その設定を読み込んで動作を制御する。
+
+### 設定項目
+
+```yaml
+resolve-reply:
+  enabled: true          # 解決時にスレッドへ返信するか（デフォルト: false）
+  template: "✅ {commit_hash} で修正しました"  # 省略時はAIが生成
+```
+
+- `resolve-reply.enabled`: `true` の場合、スレッド解決前に返信コメントを投稿する
+- `resolve-reply.template`: 返信メッセージのテンプレート。`{commit_hash}` をショートコミットハッシュに置換する。**省略時はAIが指摘内容・修正内容に応じて適切な返信メッセージを生成する**
+- 設定ファイルが存在しない場合は返信なし（従来と同じ動作）
+
 ## 解決済み処理
 
 レビュー指摘を修正＆コミットした後、該当のレビュースレッドを解決済み（resolved）にする。
@@ -90,7 +106,22 @@ PRのレビュー指摘事項とCIエラーを1つずつ修正するスキル。
      }' -f owner='{owner}' -f repo='{repo}' -F pr={pr_number}
    ```
 
-2. **修正＆コミット後にスレッドを解決済みにする**
+2. **修正＆コミット後、設定に応じてスレッドに返信する**
+   - `.pr-review-fix/.pr-review-fix.yml` を読み込み、`resolve-reply.enabled` が `true` の場合のみ返信する
+   - `resolve-reply.template` がある場合: テンプレートの `{commit_hash}` をコミットのショートハッシュに置換して返信
+   - `resolve-reply.template` がない場合: 指摘内容と修正内容を踏まえて、AIが簡潔な返信メッセージを生成して返信（コミットハッシュは必ず含める）
+   ```bash
+   gh api graphql -f query='
+     mutation($threadId: ID!, $body: String!) {
+       addPullRequestReviewThreadReply(input: {pullRequestReviewThreadId: $threadId, body: $body}) {
+         comment {
+           id
+         }
+       }
+     }' -f threadId='{thread_id}' -f body='{reply_message}'
+   ```
+
+3. **スレッドを解決済みにする**
    ```bash
    gh api graphql -f query='
      mutation($threadId: ID!) {
@@ -102,7 +133,7 @@ PRのレビュー指摘事項とCIエラーを1つずつ修正するスキル。
      }' -f threadId='{thread_id}'
    ```
 
-3. **CIエラーはスレッド解決の対象外**（レビュー指摘のみ）
+4. **CIエラーはスレッド解決・返信の対象外**（レビュー指摘のみ）
 
 ## コミット形式
 
