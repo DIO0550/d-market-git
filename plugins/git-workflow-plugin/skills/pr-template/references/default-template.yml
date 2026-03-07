@@ -54,6 +54,31 @@ body_sections:
     title: "削除した内容"
     required: false
     prompt: "削除した機能やファイル"
+  - key: "diagrams"
+    title: "システム図"
+    required: false
+    prompt: >
+      変更内容を視覚的に表すシステム図を生成する。
+      差分を分析し、状態遷移にはstateDiagram-v2、処理フローにはflowchart、
+      API通信にはsequenceDiagram、DB変更にはerDiagram、依存関係にはgraphを使用。
+      Mermaidで表現しにくい場合はASCII artを使用する。
+      変更箇所はstyle・note・[NEW]注釈で強調する。
+      .specs/のimplementation-plan.mdが存在する場合は参考にする。
+      図解不要な場合はセクション自体を省略する。
+    notation:
+      primary: "mermaid"
+      fallback: "ascii"
+    diagram_types:
+      - type: "stateDiagram-v2"
+        trigger: "状態(status/state)の追加・変更・遷移ロジックの修正"
+      - type: "flowchart"
+        trigger: "処理フロー・条件分岐・ワークフローの変更"
+      - type: "sequenceDiagram"
+        trigger: "API呼び出し・サービス間通信・非同期処理の変更"
+      - type: "erDiagram"
+        trigger: "DBスキーマ・テーブル関係の変更"
+      - type: "graph"
+        trigger: "モジュール構成・依存関係・ファイル構造の大幅な変更"
   - key: "issues"
     title: "関連Issue"
     required: true

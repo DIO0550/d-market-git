@@ -36,6 +36,96 @@
 
 -
 
+## 📊 システム図
+
+<!-- テンプレート(.pr-template.yml)で diagrams が有効な場合のみ記載。無効の場合はセクションごと削除 -->
+
+### 状態マシン / フロー図
+
+```
+{ここに状態マシン図またはフロー図を記述すること}
+{すべての状態・遷移条件・分岐を含めること}
+{変更箇所には [NEW] や [CHANGED] で注釈をつけること}
+```
+
+<!--
+例 (Mermaid):
+
+```mermaid
+stateDiagram-v2
+    [*] --> Draft: 注文作成
+    Draft --> Pending: 確認
+    Pending --> Paid: 決済完了
+    Pending --> Cancelled: キャンセル
+    Draft --> Cancelled: キャンセル
+    Paid --> Shipped: 発送
+    Shipped --> Delivered: 配達完了
+    Delivered --> [*]
+    Cancelled --> [*]
+
+    note right of Cancelled: [NEW] 今回追加
+```
+
+例 (ASCII art):
+
+```
+                 ┌─────────┐
+                 │  Draft  │
+                 └────┬────┘
+                      │ 確認
+          キャンセル   │
+     ┌────────────────┤
+     │                ▼
+     │          ┌──────────┐
+     │          │ Pending  │
+     │          └────┬─────┘
+     │               │
+     │    ┌──────────┤
+     │    │ キャンセル │ 決済完了
+     ▼    ▼          ▼
+┌───────────┐  ┌──────────┐
+│ Cancelled │  │   Paid   │
+│   [NEW]   │  └────┬─────┘
+└───────────┘       │ 発送
+                    ▼
+              ┌──────────┐
+              │ Shipped  │
+              └────┬─────┘
+                   │ 配達完了
+                   ▼
+              ┌───────────┐
+              │ Delivered │
+              └───────────┘
+```
+-->
+
+### データフロー
+
+```
+{ここにデータフロー図を記述すること}
+{コンポーネント間のデータの流れを含めること}
+{変更箇所には [NEW] や [CHANGED] で注釈をつけること}
+```
+
+<!--
+例:
+
+```
+Client (POST /orders/:id/cancel)
+    ↓
+OrderController.cancel()
+    ↓
+OrderService.cancel()
+    ├─→ OrderRepository.updateStatus(id, 'cancelled')  [NEW]
+    │       ↓
+    │   Database (orders テーブル)
+    │
+    └─→ NotificationService.sendCancelEmail()  [NEW]
+            ↓
+        Email送信 (ユーザーへキャンセル通知)
+```
+-->
+
 ## 📋 関連 Issue
 
 <!-- 関連するIssueがある場合は記載してください -->
@@ -134,3 +224,4 @@
 
 -
 -
+
