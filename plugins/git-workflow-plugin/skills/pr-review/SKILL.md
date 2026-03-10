@@ -16,9 +16,9 @@ PR番号・ブランチ名・PR URLから差分を取得し、プロジェクト
 
 `gh` コマンドはPR番号・ブランチ名・URLのいずれも受け付けるため、`$0` をそのまま渡す。
 
-- PR情報: !`[ -n "$0" ] && gh pr view "$0" --json number,title,body,baseRefName,headRefName,url 2>/dev/null || true`
-- 変更ファイル一覧: !`[ -n "$0" ] && gh pr diff "$0" --name-only 2>/dev/null || true`
-- diff: !`[ -n "$0" ] && gh pr diff "$0" 2>/dev/null || true`
+- PR情報: !`gh pr view "$0" --json number,title,body,baseRefName,headRefName,url 2>/dev/null`
+- 変更ファイル一覧: !`gh pr diff "$0" --name-only 2>/dev/null`
+- diff: !`gh pr diff "$0" 2>/dev/null`
 
 入力例:
 - `/pr-review 123` — PR番号
