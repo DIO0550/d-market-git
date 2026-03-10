@@ -10,12 +10,17 @@ argument-hint: (引数なし)
 
 `.pr-review-fix/.pr-review-fix.yml` を対話的に作成するスキル。
 
+## デフォルトテンプレート
+
+`references/default-template.yml` をベースに、プロジェクトの `.pr-review-fix/.pr-review-fix.yml` に設定ファイルを生成する。
+
 ## ワークフロー
 
-1. プロジェクトルートに既存の `.pr-review-fix/.pr-review-fix.yml` があるか確認する
+1. `references/default-template.yml` の内容を読み込む
+2. プロジェクトルートに既存の `.pr-review-fix/.pr-review-fix.yml` があるか確認する
    - 既にある場合: 内容を読み込んで表示し、上書きするか確認する
-2. ユーザーに以下を順番に質問する
-3. 回答に基づいて設定ファイルを生成する
+3. ユーザーに以下を順番に質問する
+4. 回答に基づいて設定ファイルを生成する
 
 ## ヒアリング項目
 
