@@ -16,9 +16,12 @@ if [ -z "$command" ]; then
 fi
 
 # git add の危険なパターンをチェック
-# 対象: git add -A, git add --all, git add .
+# 対象: git add -A, git add --all, git add ., git add -a
 # git add -Aや--allは意図しないファイル(.env, credentials等)をステージングするリスクがある
-if echo "$command" | grep -qE '(^|&&|;|\||\$\()\s*git\s+add\s+(-A|--all|\.)\b'; then
+# プレフィックスコマンド(command, env, sudo等)や-Aが先頭引数でないケース(-v -A等)にも対応
+if echo "$command" | grep -qE '\bgit\s+add\b.*(\s-[a-zA-Z]*A[a-zA-Z]*\b|\s--all\b|\s\.\s|\s\.$)' \
+   || echo "$command" | grep -qE '\bgit\s+add\s+(-A\b|--all\b|\.\s|\.$)' \
+   || echo "$command" | grep -qE '\bgit\s+add\s+-a\b'; then
     cat <<'EOF'
 {
     "decision": "block",
