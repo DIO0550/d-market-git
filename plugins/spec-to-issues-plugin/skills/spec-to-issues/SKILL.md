@@ -83,16 +83,22 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 | MDの内容 | Issueタイプ |
 |:--|:--|
 | 新機能、コンポーネント設計、画面実装 | `Feature` |
-| DB変更、スキーマ移行、API移行、リファクタリング | `Migration` |
-| テスト戦略、テストケース、品質基準 | `Test` |
-| ドキュメント作成、README更新、API仕様書 | `Docs` |
+| DB変更、スキーマ移行、API移行、技術スタック移行 | `Migration` |
+| E2Eテスト、統合テスト | `Test` |
+| README、API仕様書、ユーザーガイド等の独立ドキュメント | `Docs` |
 | CI/CD、ツール設定、依存更新、リント設定 | `Chore` |
+
+**Feature Issueに含めるもの（独立Issueにしない）:**
+- 単体テストは実装と一体のため、Feature Issueのタスクとして含める
+- UI関連のStorybookも同様に、Feature Issueのタスクとして含める
+- 実装に伴う小規模リファクタリング（関数分割、命名変更、既存コードの整理等）はFeature Issueのタスクとして含める。大規模な技術移行（フレームワーク移行、スキーマ変更等）のみMigrationとして分離する
+- コード内ドキュメント（JSDoc、コメント、型定義の説明等）はFeature Issueに含める。独立したドキュメント（README、API仕様書、ユーザーガイド等）のみDocsとして分離する
 
 **エリア判定キーワード:**
 
 | エリア | キーワード例 |
 |:--|:--|
-| `area:frontend` | UI, component, page, screen, CSS, React, Vue, Next.js |
+| `area:frontend` | UI, component, page, screen, CSS, React, Vue, Next.js, Storybook |
 | `area:server` | API, endpoint, database, server, handler, middleware |
 | `area:shared` | shared, common, utils, types, interface, schema |
 
@@ -125,8 +131,8 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 | データモデル → API → UI | 基盤となる実装を先に |
 | スキーマ変更 → マイグレーション → アプリコード | DB変更は先行 |
 | 共通コンポーネント → 個別画面 | 共通部品を先に |
-| 機能実装 → テスト | テストは実装後 |
-| 機能実装 → ドキュメント | Docsは実装後 |
+| 機能実装 → E2E・統合テスト | E2E・統合テストは実装後 |
+| 機能実装 → 独立ドキュメント | 独立Docsは実装後 |
 
 - 依存関係はIssue間で設定する（Sub-issue間では不要）
 

@@ -102,13 +102,14 @@ types:
 
   - name: migration
     label: "type:migration"
-    description: "マイグレーション・移行作業"
+    description: "大規模な技術移行・マイグレーション（実装に伴う小規模リファクタリングはFeatureに含める）"
     detection_keywords:
       - "DB変更"
       - "スキーマ移行"
       - "API移行"
-      - "リファクタリング"
       - "データ移行"
+      - "技術スタック移行"
+      - "フレームワーク移行"
     body_sections:
       - key: overview
         title: "概要"
@@ -138,13 +139,12 @@ types:
 
   - name: test
     label: "type:test"
-    description: "テスト追加・テスト改善"
+    description: "E2Eテスト・統合テスト（単体テストはFeature Issueに含める）"
     detection_keywords:
-      - "テスト戦略"
-      - "テストケース"
-      - "品質基準"
       - "E2E"
-      - "ユニットテスト"
+      - "統合テスト"
+      - "結合テスト"
+      - "テスト戦略"
     body_sections:
       - key: overview
         title: "概要"
@@ -167,12 +167,13 @@ types:
 
   - name: docs
     label: "type:docs"
-    description: "ドキュメント作成・更新"
+    description: "独立ドキュメントの作成・更新（コード内ドキュメントはFeatureに含める）"
     detection_keywords:
-      - "ドキュメント作成"
-      - "README更新"
+      - "README"
       - "API仕様書"
+      - "ユーザーガイド"
       - "手順書"
+      - "アーキテクチャドキュメント"
     body_sections:
       - key: overview
         title: "概要"
@@ -252,6 +253,7 @@ labels:
         - "React"
         - "Vue"
         - "Next.js"
+        - "Storybook"
     - name: "area:server"
       description: "バックエンド/サーバ"
       color: "68A063"
@@ -332,8 +334,8 @@ rules:
       - "データモデル → API → UI"
       - "スキーマ変更 → マイグレーション → アプリコード"
       - "共通コンポーネント → 個別画面"
-      - "機能実装 → テスト"
-      - "機能実装 → ドキュメント"
+      - "機能実装 → E2E・統合テスト"
+      - "機能実装 → 独立ドキュメント"
 
 # 例
 examples:
