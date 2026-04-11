@@ -1,6 +1,6 @@
 ---
-name: init-pr-review-fix-config
-description: PRレビュー修正の設定ファイル(.pr-review-fix/.pr-review-fix.yml)を対話的に生成するスキル。「pr-review-fixの設定を作って」「レビュー修正の設定を初期化して」「pr-review-fixのテンプレート作って」などのリクエスト時に使用。プロジェクトにまだ設定ファイルがない場合や、設定を変更したい場合に使う。
+name: pr-review-fix-template
+description: PRレビュー修正の設定ファイル(.pr-review-fix/.pr-review-fix.yml)を対話的に生成するスキル。「pr-review-fixのテンプレート作って」「pr-review-fixの設定を作って」「レビュー修正の設定を初期化して」などのリクエスト時に使用。プロジェクトにまだ設定ファイルがない場合や、設定を変更したい場合に使う。
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, AskUserQuestion
 argument-hint: (引数なし)
@@ -53,11 +53,21 @@ argument-hint: (引数なし)
 
 選択結果を `re-request-review.mode` として設定ファイルに書き込む。
 
+### Q4: レビュー監視の未解決時挙動
+
+`copilot-review-watch` スキルが PR 作成後にレビュー完了を待ち受ける際、未解決スレッドを検知したときの挙動を指定する。
+
+> 未解決指摘を検知したらどう動きますか？
+> 1. notify: 件数と箇所を報告して終了する（デフォルト）
+> 2. auto:   `pr-fix-review` を自動起動して修正フローへ入る
+
+選択結果を `review-watch.on-unresolved` として設定ファイルに書き込む。監視対象レビュアー (`reviewers`) とポーリング間隔 (`poll-interval`) はデフォルトテンプレートの値 (`["copilot"]` / `30`) をそのまま書き出す（高度な設定はユーザーが生成後に手動編集する想定）。
+
 ## 生成する設定ファイル
 
 パス: `{プロジェクトルート}/.pr-review-fix/.pr-review-fix.yml`
 
-最終的な YAML は `resolve-reply`（Q1・Q2 の結果）と `re-request-review`（Q3 の結果）の 2 セクションを常に合成して出力する。以下は各セクションのパターン。
+最終的な YAML は `resolve-reply`（Q1・Q2 の結果）、`re-request-review`（Q3 の結果）、`review-watch`（Q4 の結果）の 3 セクションを常に合成して出力する。以下は各セクションのパターン。
 
 ### `resolve-reply` セクションのパターン
 
@@ -100,6 +110,21 @@ re-request-review:
   mode: {skip | auto | ask}
 ```
 
+### `review-watch` セクション
+
+Q4 の回答を `on-unresolved` に書き込む。`reviewers` と `poll-interval` はデフォルト値をそのまま出力する。
+
+```yaml
+review-watch:
+  # 監視対象レビュアー（部分一致・大文字小文字無視）
+  reviewers:
+    - copilot
+  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ
+  on-unresolved: {notify | auto}
+  # ポーリング間隔（秒）
+  poll-interval: 30
+```
+
 ### 合成例
 
 ```yaml
@@ -111,6 +136,12 @@ resolve-reply:
 
 re-request-review:
   mode: ask
+
+review-watch:
+  reviewers:
+    - copilot
+  on-unresolved: auto
+  poll-interval: 30
 ```
 
 ## 完了時

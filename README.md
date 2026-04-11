@@ -33,7 +33,7 @@ PR の CI エラー修正・レビュー指摘修正を自動化するプラグ�
 | `/pr-ci-fix` | CI エラー（ビルド・テスト・Lint）を 1 エラー = 1 コミットで修正 |
 | `/pr-fix-review` | 未解決のレビューコメントを 1 指摘 = 1 コミットで修正 |
 | `/pr-all-fix` | CI エラー + レビュー指摘を一括修正（CI 優先） |
-| `/init-pr-review-fix-config` | レビュー修正時の設定ファイル生成 |
+| `/pr-review-fix-template` | レビュー修正時の設定ファイル生成 |
 | `/similarity` | コードの類似度検出（リファクタリング候補の特定） |
 
 ### 3. spec-to-issues-plugin
