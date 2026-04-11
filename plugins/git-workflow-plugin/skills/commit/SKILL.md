@@ -1,6 +1,6 @@
 ---
 name: commit
-description: コミットルールスキル。コミットメッセージの書き方、分割ルール、禁止事項を定義。「コミットしたい」「変更をコミット」「git commit」などのリクエスト時に使用。絵文字付きタイプ、Issue連携、細かい分割を遵守。
+description: コミットルールスキル。コミットメッセージの書き方、分割ルール、禁止事項（git add -A 等）を定義。git commit を実行する前に必ず参照する（ユーザー指示の有無を問わない）。絵文字付きタイプ、Issue連携、細かい分割を遵守。
 allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git diff *)
 ---
 
