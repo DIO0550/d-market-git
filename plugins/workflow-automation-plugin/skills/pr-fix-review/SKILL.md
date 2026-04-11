@@ -156,6 +156,11 @@ re-request-review:
    gh pr view <PR番号> --json reviews --jq '[.reviews[].author.login] | unique | map(select(. != null))'
    ```
    - 取得結果が 0 人の場合は再依頼をスキップしてサマリー報告へ進む
+   - **Copilot が過去にレビューしている場合の注意**: `.reviews[].author.login` では Copilot のハンドルが取得できない／別名になることがある。Copilot によるレビューの有無は以下で判定する:
+     ```bash
+     gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login == "Copilot" or (.author.login // "") | test("copilot"; "i"))] | length'
+     ```
+     1 以上なら再依頼対象に `copilot-pull-request-reviewer` を追加する（`gh pr edit --add-reviewer` に渡すハンドルはこの固定値）
 
 5. **`ask` の場合、ユーザーに確認する**
    - 取得したレビュアー一覧を提示し、「このレビュアーに再レビュー依頼を出しますか？」と質問する
@@ -166,6 +171,10 @@ re-request-review:
    gh pr edit <PR番号> --add-reviewer <user1>,<user2>,...
    ```
    - `gh pr edit --add-reviewer` は既にレビュー済みのユーザーにも再レビューリクエストを送信できる
+   - Copilot へ再依頼する場合は `copilot-pull-request-reviewer` を指定する:
+     ```bash
+     gh pr edit <PR番号> --add-reviewer copilot-pull-request-reviewer
+     ```
 
 ## コミット形式
 
