@@ -42,27 +42,36 @@ argument-hint: (引数なし)
 
 テンプレートを指定する場合は、テンプレート文字列も聞く。利用可能な変数は `{commit_hash}`（ショートコミットハッシュ）。
 
+### Q3: プッシュ後のレビュー再依頼
+
+修正コミットをプッシュした後に、PRの全レビュアーへ再レビュー依頼を出すかどうか。
+
+> プッシュ後にレビュアーへ再レビュー依頼を出しますか？
+> 1. skip: 再依頼しない（デフォルト／従来動作）
+> 2. auto: 全レビュアーに自動で再依頼する
+> 3. ask:  プッシュ時にユーザーへ都度確認する
+
+選択結果を `re-request-review.mode` として設定ファイルに書き込む。
+
 ## 生成する設定ファイル
 
 パス: `{プロジェクトルート}/.pr-review-fix/.pr-review-fix.yml`
 
-### パターン1: 返信OFF
+最終的な YAML は `resolve-reply`（Q1・Q2 の結果）と `re-request-review`（Q3 の結果）の 2 セクションを常に合成して出力する。以下は各セクションのパターン。
+
+### `resolve-reply` セクションのパターン
+
+**パターン1: 返信OFF**
 
 ```yaml
-# レビュー指摘修正の設定
-
-# スレッド解決時の返信設定
 resolve-reply:
   # true: 解決時にスレッドへ返信する / false: 返信しない
   enabled: false
 ```
 
-### パターン2: 返信ON + テンプレート指定
+**パターン2: 返信ON + テンプレート指定**
 
 ```yaml
-# レビュー指摘修正の設定
-
-# スレッド解決時の返信設定
 resolve-reply:
   # true: 解決時にスレッドへ返信する / false: 返信しない
   enabled: true
@@ -70,16 +79,38 @@ resolve-reply:
   template: "{ユーザーが指定したテンプレート}"
 ```
 
-### パターン3: 返信ON + AI自動生成
+**パターン3: 返信ON + AI自動生成**
 
 ```yaml
-# レビュー指摘修正の設定
-
-# スレッド解決時の返信設定
 resolve-reply:
   # true: 解決時にスレッドへ返信する / false: 返信しない
   enabled: true
   # template省略時はAIが指摘内容に応じて返信メッセージを生成する
+```
+
+### `re-request-review` セクション
+
+Q3 の回答をそのまま `mode` に書き込む（`skip` / `auto` / `ask` のいずれか）。
+
+```yaml
+re-request-review:
+  # auto: 全レビュアーに自動で再レビュー依頼を出す
+  # skip: 再依頼しない（従来動作）
+  # ask:  プッシュ後にユーザーへ確認する
+  mode: {skip | auto | ask}
+```
+
+### 合成例
+
+```yaml
+# レビュー指摘修正の設定
+
+resolve-reply:
+  enabled: true
+  # template省略時はAIが指摘内容に応じて返信メッセージを生成する
+
+re-request-review:
+  mode: ask
 ```
 
 ## 完了時
