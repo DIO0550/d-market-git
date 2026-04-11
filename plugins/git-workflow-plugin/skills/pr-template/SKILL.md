@@ -47,9 +47,16 @@ checklist:
   - "セルフレビュー実施"
   - "テスト実施"
 
+review_watch:
+  enabled: false
+
 examples:
   - title: "PRタイトル例"
 ```
+
+### review_watch セクション
+
+PR作成後にCopilot等のレビュー完了を自動監視するかを制御するフラグ。`enabled: true` にすると、`pr-creation-agent` が PR 作成成功後に `copilot-review-watch` スキルを起動する。監視対象レビュアー・未解決時の挙動・ポーリング間隔は `.pr-review-fix/.pr-review-fix.yml` の `review-watch` セクションで指定する。
 
 ### カスタマイズ
 

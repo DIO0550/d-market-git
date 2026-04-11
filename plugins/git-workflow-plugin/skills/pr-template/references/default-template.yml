@@ -125,6 +125,12 @@ checklist:
   - "関連IssueをPRにリンクした"
   - "破壊的変更がある場合は明記した"
 
+review_watch:
+  enabled: false  # PR作成後にCopilot等のレビュー完了をMonitorツールで自動監視するか
+                  # true にすると pr-creation-agent が copilot-review-watch スキルを起動する
+                  # 監視対象レビュアー・未解決時の挙動は .pr-review-fix/.pr-review-fix.yml の
+                  # review-watch セクションで制御する
+
 examples:
   - title: "✨ [New Feature]: #123 ユーザ検索にロール絞り込みを追加"
     summary: "ユーザ一覧画面にロールフィルタを追加し、検索条件を保存するように変更。"

@@ -95,3 +95,22 @@ PR作成前の確認事項:
 - [ ] 破壊的変更の明記（該当時）
 
 デフォルトテンプレートは `references/pr-template.md` を参照。
+
+## PR作成後のレビュー監視
+
+`.pr-templates/.pr-template.yml` の `review_watch.enabled` が `true` の場合、PR作成成功後に `copilot-review-watch` スキルを起動してCopilot等のレビュー完了をバックグラウンド監視する。
+
+### 起動条件
+
+- `.pr-templates/.pr-template.yml` に `review_watch.enabled: true` が設定されている
+- キーが存在しない、または `false` の場合は従来通り「PR URL提供」で完了する
+
+### 起動手順
+
+1. `.pr-review-fix/.pr-review-fix.yml` の `review-watch.reviewers` を読む（無ければ `["copilot"]` をデフォルト）
+2. 対象レビュアーを PR に追加する
+   ```bash
+   gh pr edit <PR番号> --add-reviewer <reviewer1>,<reviewer2>,...
+   ```
+   - Copilot を追加する場合のハンドルは `copilot-pull-request-reviewer` 固定
+3. `Skill` ツールで `copilot-review-watch <PR番号>` を呼び出し、以降は `copilot-review-watch` の仕様に従う
