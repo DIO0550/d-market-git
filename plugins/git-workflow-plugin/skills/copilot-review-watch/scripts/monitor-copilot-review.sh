@@ -26,7 +26,7 @@ REPO=$2
 PR=$3
 
 WATCH_REVIEWERS=${WATCH_REVIEWERS:-copilot}
-POLL_INTERVAL=${POLL_INTERVAL:-30}
+POLL_INTERVAL=${POLL_INTERVAL:-60}
 
 reviewers_json=$(printf '%s' "$WATCH_REVIEWERS" \
   | awk 'BEGIN{RS=","; ORS="\n"} {gsub(/^[ \t]+|[ \t]+$/, ""); if (length) print}' \

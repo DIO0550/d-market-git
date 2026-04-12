@@ -61,7 +61,7 @@ argument-hint: (引数なし)
 > 1. notify: 件数と箇所を報告して終了する（デフォルト）
 > 2. auto:   `pr-fix-review` を自動起動して修正フローへ入る
 
-選択結果を `review-watch.on-unresolved` として設定ファイルに書き込む。監視対象レビュアー (`reviewers`) とポーリング間隔 (`poll-interval`) はデフォルトテンプレートの値 (`["copilot"]` / `30`) をそのまま書き出す（高度な設定はユーザーが生成後に手動編集する想定）。
+選択結果を `review-watch.on-unresolved` として設定ファイルに書き込む。監視対象レビュアー (`reviewers`) とポーリング間隔 (`poll-interval`) はデフォルトテンプレートの値 (`["copilot"]` / `60`) をそのまま書き出す（高度な設定はユーザーが生成後に手動編集する想定）。
 
 ## 生成する設定ファイル
 
@@ -122,7 +122,7 @@ review-watch:
   # auto: pr-fix-review へ自動チェーン / notify: 報告のみ
   on-unresolved: {notify | auto}
   # ポーリング間隔（秒）
-  poll-interval: 30
+  poll-interval: 60
 ```
 
 ### 合成例
@@ -141,7 +141,7 @@ review-watch:
   reviewers:
     - copilot
   on-unresolved: auto
-  poll-interval: 30
+  poll-interval: 60
 ```
 
 ## 完了時

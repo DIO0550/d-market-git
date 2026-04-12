@@ -25,5 +25,5 @@ review-watch:
   # auto:   pr-fix-review スキルへ自動チェーン（即座に修正フローへ入る）
   # notify: 指摘件数と path:line を報告して終了（デフォルト）
   on-unresolved: notify
-  # 監視スクリプトのポーリング間隔（秒、デフォルト: 30）
-  poll-interval: 30
+  # 監視スクリプトのポーリング間隔（秒、デフォルト: 60）
+  poll-interval: 60

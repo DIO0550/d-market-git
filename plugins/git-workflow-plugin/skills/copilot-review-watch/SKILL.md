@@ -38,7 +38,7 @@ review-watch:
   reviewers:
     - copilot
   on-unresolved: notify  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ
-  poll-interval: 30      # 秒
+  poll-interval: 60      # 秒
 ```
 
 ### 各キーの意味
@@ -47,9 +47,9 @@ review-watch:
 - `on-unresolved`: 未解決スレッドを検知したときの挙動
   - `auto`: 検知と同時に `pr-fix-review <PR番号>` スキルをチェーン呼び出し
   - `notify`: 指摘件数と `path:line` を報告して監視を終了する（デフォルト）
-- `poll-interval`: GraphQL ポーリング間隔（秒）。デフォルト 30
+- `poll-interval`: GraphQL ポーリング間隔（秒）。デフォルト 60
 
-設定ファイルまたはキーが存在しない場合のデフォルト: `reviewers=["copilot"]` / `on-unresolved=notify` / `poll-interval=30`。
+設定ファイルまたはキーが存在しない場合のデフォルト: `reviewers=["copilot"]` / `on-unresolved=notify` / `poll-interval=60`。
 
 ## 手順
 

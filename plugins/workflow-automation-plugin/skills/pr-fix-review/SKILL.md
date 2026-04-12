@@ -71,7 +71,7 @@ review-watch:
   reviewers:
     - copilot            # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
   on-unresolved: notify  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ（デフォルト: notify）
-  poll-interval: 30      # ポーリング間隔（秒、デフォルト: 30）
+  poll-interval: 60      # ポーリング間隔（秒、デフォルト: 60）
 ```
 
 - `resolve-reply.enabled`: `true` の場合、スレッド解決前に返信コメントを投稿する
@@ -85,8 +85,8 @@ review-watch:
   - `on-unresolved`: 未解決スレッドを検知したときの挙動
     - `auto`: `pr-fix-review <PR番号>` を自動チェーン呼び出しする（本スキルを `copilot-review-watch` から起動されるエントリポイントとして利用する）
     - `notify`: 指摘件数と `path:line` を報告して監視を終了する（デフォルト）
-  - `poll-interval`: 監視スクリプトのポーリング間隔（秒）。デフォルト 30
-- 設定ファイルが存在しない、または各キーが無い場合はそれぞれ「返信なし」「再依頼なし」「監視対象 copilot / on-unresolved=notify / poll-interval=30」（従来の動作）とみなす
+  - `poll-interval`: 監視スクリプトのポーリング間隔（秒）。デフォルト 60
+- 設定ファイルが存在しない、または各キーが無い場合はそれぞれ「返信なし」「再依頼なし」「監視対象 copilot / on-unresolved=notify / poll-interval=60」（従来の動作）とみなす
 
 ## 解決済み処理
 
