@@ -65,6 +65,12 @@ resolve-reply:
 
 re-request-review:
   mode: skip             # プッシュ後のレビュー再依頼: auto / skip / ask（デフォルト: skip）
+
+review-watch:
+  reviewers:
+    - copilot            # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
+  on-unresolved: notify  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ（デフォルト: notify）
+  poll-interval: 30      # ポーリング間隔（秒、デフォルト: 30）
 ```
 
 - `resolve-reply.enabled`: `true` の場合、スレッド解決前に返信コメントを投稿する
@@ -73,7 +79,13 @@ re-request-review:
   - `auto`: `gh pr view` で取得した全レビュアーへ自動で再依頼する
   - `skip`: 再依頼しない（従来動作）
   - `ask`:  プッシュ直後にレビュアー一覧を提示し、ユーザーに再依頼するか確認する
-- 設定ファイルが存在しない、または各キーが無い場合はそれぞれ「返信なし」「再依頼なし」（従来の動作）とみなす
+- `review-watch`: `copilot-review-watch` スキルが参照する設定（PR 作成後のレビュー完了待ち）
+  - `reviewers`: 監視対象レビュアーのログイン名トークン（配列）。**部分一致・大文字小文字無視**。`copilot` の 1 語で `Copilot` / `copilot-pull-request-reviewer` の両方にマッチする
+  - `on-unresolved`: 未解決スレッドを検知したときの挙動
+    - `auto`: `pr-fix-review <PR番号>` を自動チェーン呼び出しする（本スキルを `copilot-review-watch` から起動されるエントリポイントとして利用する）
+    - `notify`: 指摘件数と `path:line` を報告して監視を終了する（デフォルト）
+  - `poll-interval`: 監視スクリプトのポーリング間隔（秒）。デフォルト 30
+- 設定ファイルが存在しない、または各キーが無い場合はそれぞれ「返信なし」「再依頼なし」「監視対象 copilot / on-unresolved=notify / poll-interval=30」（従来の動作）とみなす
 
 ## 解決済み処理
 

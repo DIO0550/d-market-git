@@ -1,0 +1,29 @@
+# レビュー指摘修正の設定
+
+# スレッド解決時の返信設定
+resolve-reply:
+  # true: 解決時にスレッドへ返信する / false: 返信しない（デフォルト: false）
+  enabled: true
+  # 返信テンプレート（省略時はAIが指摘内容に応じて返信メッセージを生成する）
+  # 利用可能な変数: {commit_hash}
+  # template: "✅ {commit_hash} で修正しました"
+
+# プッシュ後のレビュー再依頼設定
+re-request-review:
+  # auto: 全レビュアーに自動で再レビュー依頼を出す
+  # skip: 再依頼しない（デフォルト／従来動作）
+  # ask:  プッシュ後にユーザーへ確認する
+  mode: skip
+
+# PR作成後のレビュー完了待ち監視設定（copilot-review-watch スキルが参照）
+review-watch:
+  # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
+  # "copilot" の1語で Copilot / copilot-pull-request-reviewer の両方にマッチする
+  reviewers:
+    - copilot
+  # 未解決スレッドを検知したときの挙動
+  # auto:   pr-fix-review スキルへ自動チェーン（即座に修正フローへ入る）
+  # notify: 指摘件数と path:line を報告して終了（デフォルト）
+  on-unresolved: notify
+  # 監視スクリプトのポーリング間隔（秒、デフォルト: 30）
+  poll-interval: 30
