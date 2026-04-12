@@ -1,7 +1,7 @@
 ---
 name: pr-fix-review
 description: PRのレビュー指摘修正スキル。未解決のレビューコメントを確認し、1つずつ順番に修正してコミットし、スレッドを解決済みにする。「レビュー指摘を直して」「レビュー対応して」などのリクエスト時に使用。
-allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write
+allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write, Skill
 argument-hint: [PR番号]
 ---
 
@@ -25,6 +25,8 @@ PRのレビュー指摘を1つずつ修正するスキル。
 6. 設定に応じてレビュー再依頼（auto / skip / ask）
    ↓
 7. サマリー報告
+   ↓
+8. copilot-review-watch でレビュー監視を起動
 ```
 
 ### タスク管理ルール
@@ -186,6 +188,21 @@ review-watch:
      ```bash
      gh pr edit <PR番号> --add-reviewer copilot-pull-request-reviewer
      ```
+
+## プッシュ後のレビュー監視
+
+全修正のプッシュとレビュー再依頼が完了した後、`copilot-review-watch` スキルを起動してCopilot等のレビュー完了をバックグラウンド監視する。
+
+### 起動条件
+
+- `.pr-review-fix/.pr-review-fix.yml` の `review-watch.enabled` を参照する
+- `false` に明示されている場合は監視しない
+- `true` または未指定の場合は監視を起動する（デフォルト: `true`）
+
+### 起動手順
+
+1. `.pr-review-fix/.pr-review-fix.yml` の `review-watch.reviewers` を読む（無ければ `["copilot"]` をデフォルト）
+2. `Skill` ツールで `copilot-review-watch <PR番号>` を呼び出し、以降は `copilot-review-watch` の仕様に従う
 
 ## コミット形式
 

@@ -1,7 +1,7 @@
 ---
 name: pull-request
 description: プルリクエスト作成スキル。PRテンプレートに基づいた説明文の作成、変更種類の分類、チェックリストの確認を支援。「PR作成」「プルリクエスト」「レビュー依頼」などのリクエスト時に使用。
-allowed-tools: Bash(git *), Bash(gh pr *), Read, Glob
+allowed-tools: Bash(git *), Bash(gh pr *), Read, Glob, Skill
 ---
 
 # プルリクエスト作成
@@ -98,12 +98,13 @@ PR作成前の確認事項:
 
 ## PR作成後のレビュー監視
 
-`.pr-templates/.pr-template.yml` の `review_watch.enabled` が `true` の場合、PR作成成功後に `copilot-review-watch` スキルを起動してCopilot等のレビュー完了をバックグラウンド監視する。
+PR作成成功後に `copilot-review-watch` スキルを起動してCopilot等のレビュー完了をバックグラウンド監視する。
 
 ### 起動条件
 
-- `.pr-templates/.pr-template.yml` に `review_watch.enabled: true` が設定されている
-- キーが存在しない、または `false` の場合は従来通り「PR URL提供」で完了する
+- `.pr-templates/.pr-template.yml` の `review_watch.enabled` を参照する
+- `false` に明示されている場合は監視しない
+- `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
 ### 起動手順
 
