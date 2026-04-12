@@ -36,7 +36,33 @@ if [ "$is_gh" = false ] && [ "$is_git" = false ]; then
 fi
 
 # 共通: &&, ||, ; をブロック
-if echo "$command" | grep -qE '&&|\|\||;'; then
+# heredoc（<<）のコンテンツ部分のみを除去し、コマンド構造はすべてチェックする
+check_target="$command"
+if echo "$command" | grep -qE '<<'; then
+    # heredocデリミタを抽出（<<'EOF', <<"EOF", <<EOF, <<-EOF 等に対応）
+    delim=$(echo "$command" | sed -n "s/.*<<-*[[:space:]]*['\"\`]*\([A-Za-z_][A-Za-z_0-9]*\)['\"\`]*.*/\1/p" | head -1)
+    if [ -n "$delim" ]; then
+        # heredocコンテンツ行（開始行の次〜デリミタ行）を除去、コマンド構造行は保持
+        check_target=$(echo "$command" | awk -v d="$delim" '
+            /<</ && !skip { skip=1; print; next }
+            skip && $0 ~ "^[[:space:]]*"d"[[:space:]]*$" { skip=0; next }
+            !skip { print }
+        ')
+    fi
+fi
+# 改行による複数コマンド分離もブロック（heredocコンテンツ除去後）
+num_cmd_lines=$(echo "$check_target" | grep -cE '^\s*[a-zA-Z/\.]')
+if [ "$num_cmd_lines" -gt 1 ]; then
+    jq -n '{
+        hookSpecificOutput: {
+            hookEventName: "PreToolUse",
+            permissionDecision: "deny",
+            permissionDecisionReason: "改行による複数コマンドの実行は禁止されています。1コマンドずつ実行してください。"
+        }
+    }'
+    exit 0
+fi
+if echo "$check_target" | grep -qE '&&|\|\||;'; then
     jq -n '{
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
@@ -47,8 +73,8 @@ if echo "$command" | grep -qE '&&|\|\||;'; then
     exit 0
 fi
 
-# git のみ: パイプもブロック
-if [ "$is_git" = true ] && echo "$command" | grep -qE '\|'; then
+# git のみ: パイプもブロック（heredoc部分を除外してチェック）
+if [ "$is_git" = true ] && echo "$check_target" | grep -qE '\|'; then
     jq -n '{
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
