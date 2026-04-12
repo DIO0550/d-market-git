@@ -77,12 +77,13 @@ if [[ "$is_protected" == true ]]; then
     protected_list=$(IFS=', '; echo "${PROTECTED_BRANCHES[*]}")
     
     # JSON形式でブロックメッセージを出力
-    cat <<EOF
-{
-    "decision": "block",
-    "reason": "保護されたブランチ'$current_branch'での編集は禁止されています。\n\n📋 実装ルール:\n- 保護されたブランチ（$protected_list）への直接的な変更は禁止です\n- 機能開発や修正は必ず別ブランチで行ってください\n- 作業完了後、プルリクエスト経由でマージしてください\n\n💡 推奨手順:\n1. 新しいブランチを作成: git checkout -b feature/your-feature-name\n2. 変更を実装\n3. プルリクエストを作成してレビューを受ける"
-}
-EOF
+    jq -n --arg branch "$current_branch" --arg branches "$protected_list" '{
+        hookSpecificOutput: {
+            hookEventName: "PreToolUse",
+            permissionDecision: "deny",
+            permissionDecisionReason: ("保護されたブランチ\u0027" + $branch + "\u0027での編集は禁止されています。\n\n実装ルール:\n- 保護されたブランチ（" + $branches + "）への直接的な変更は禁止です\n- 機能開発や修正は必ず別ブランチで行ってください\n- 作業完了後、プルリクエスト経由でマージしてください\n\n推奨手順:\n1. 新しいブランチを作成: git checkout -b feature/your-feature-name\n2. 変更を実装\n3. プルリクエストを作成してレビューを受ける")
+        }
+    }'
     exit 0
 fi
 
