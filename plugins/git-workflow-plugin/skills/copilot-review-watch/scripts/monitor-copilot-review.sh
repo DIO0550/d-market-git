@@ -38,6 +38,14 @@ while true; do
       query($owner:String!, $repo:String!, $pr:Int!) {
         repository(owner:$owner, name:$repo) {
           pullRequest(number:$pr) {
+            reviewRequests(last:20) {
+              nodes {
+                requestedReviewer {
+                  ... on User { login }
+                  ... on Bot { login }
+                }
+              }
+            }
             reviews(last:20) {
               nodes { author { login } state submittedAt }
             }
@@ -61,6 +69,10 @@ while true; do
       | any($ts[]; . as $t | ($login // "") | ascii_downcase | contains($t | ascii_downcase));
 
     .data.repository.pullRequest as $pr
+    # レビューリクエストが残っているか（依頼中でまだ未提出）
+    | ($pr.reviewRequests.nodes
+        | map(select(match_any(.requestedReviewer.login)))
+        | length > 0) as $has_pending_request
     | ($pr.reviews.nodes
         | map(select(match_any(.author.login)))
         | sort_by(.submittedAt)
@@ -71,8 +83,12 @@ while true; do
             and (.isResolved == false)
             and (.isOutdated == false)
           ))) as $unresolved
-    | if $cr == null then
+    | if $has_pending_request then
+        "COPILOT_PENDING reason=review-requested"
+      elif $cr == null then
         "COPILOT_PENDING reason=no-review-yet"
+      elif $cr.state == "PENDING" then
+        "COPILOT_PENDING reason=review-in-progress"
       elif ($unresolved | length) > 0 then
         "COPILOT_UNRESOLVED count=\($unresolved | length) locations=" +
         ($unresolved | map("\(.comments.nodes[0].path):\(.comments.nodes[0].line // 0)") | join(","))

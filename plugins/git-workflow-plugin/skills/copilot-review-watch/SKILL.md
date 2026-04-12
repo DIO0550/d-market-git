@@ -76,7 +76,9 @@ Monitor tool:
 
 | タグ | 意味 |
 |:-|:-|
-| `COPILOT_PENDING reason=...` | 対象レビュアーのレビューが未提出 |
+| `COPILOT_PENDING reason=review-requested` | レビューリクエスト中（まだレビュー未開始） |
+| `COPILOT_PENDING reason=no-review-yet` | 対象レビュアーのレビューが存在しない |
+| `COPILOT_PENDING reason=review-in-progress` | レビュー作成中（state=PENDING） |
 | `COPILOT_UNRESOLVED count=N locations=path1:line1,...` | 未解決スレッドあり |
 | `COPILOT_DONE submitted=<iso8601> all_resolved=true` | 完了 |
 
