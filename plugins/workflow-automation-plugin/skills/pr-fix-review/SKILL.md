@@ -244,6 +244,17 @@ review-watch:
 1. `.pr-review-fix/.pr-review-fix.yml` の `review-watch.reviewers` を読む（無ければ `["copilot"]` をデフォルト）
 2. `Skill` ツールで `copilot-review-watch <PR番号>` を呼び出し、以降は `copilot-review-watch` の仕様に従う
 
+## コマンド実行規約
+
+- **1回のBash呼び出し = 1コマンド**（`&&`, `||`, `;` による複合化禁止）
+- コミットメッセージは **heredoc** で渡す（ファイル書き出し `-F` は使わない）:
+  ```bash
+  git commit -m "$(cat <<'EOF'
+  ♻️ [Refactoring]: レビュー指摘対応 - エラーハンドリング改善
+  EOF
+  )"
+  ```
+
 ## コミット形式
 
 プロジェクトに `.commit-templates/.commit-template.yml` が存在する場合、そのテンプレートのルールを優先して使用する。テンプレートがない場合は以下のデフォルト形式に従う。

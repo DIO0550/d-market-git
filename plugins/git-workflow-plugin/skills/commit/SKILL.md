@@ -156,6 +156,17 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 - **独立性**: コミット単体で意味をなす
 - **ビルド状態**: 各コミットでビルドが通る
 
+## コマンド実行規約
+
+- **1回のBash呼び出し = 1コマンド**（`&&`, `||`, `;` による複合化禁止）
+- コミットメッセージは **heredoc** で渡す（ファイル書き出し `-F` は使わない）:
+  ```bash
+  git commit -m "$(cat <<'EOF'
+  ✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加
+  EOF
+  )"
+  ```
+
 ## 禁止事項
 
 ### 禁止コマンド

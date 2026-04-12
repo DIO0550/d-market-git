@@ -17,6 +17,21 @@ PR本文を作成する際は、以下の順でテンプレートを参照する
 
 `.pr-templates/.pr-template.yml` がある場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
 
+## コマンド実行規約
+
+- **1回のBash呼び出し = 1コマンド**（`&&`, `||`, `;` による複合化禁止）
+- PRタイトル・本文は **heredoc** で渡す（ファイル書き出し `--body-file` は使わない）:
+  ```bash
+  gh pr create --title "PRタイトル" --body "$(cat <<'EOF'
+  ## 概要
+  - 変更内容
+
+  ## テスト計画
+  - テスト項目
+  EOF
+  )"
+  ```
+
 ## 基本構成
 
 1. **概要**: 変更の簡潔な説明
