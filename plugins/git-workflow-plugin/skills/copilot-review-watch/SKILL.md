@@ -1,7 +1,6 @@
 ---
 name: copilot-review-watch
 description: PRに対してCopilotなどのレビュー完了をMonitorツール経由でバックグラウンド監視し、未解決指摘があればpr-fix-reviewへチェーンするスキル。PR作成直後にレビュー完了を待ち受ける場面で使う。「Copilotレビュー待って」「レビュー監視」などのリクエスト時に使用。
-disable-model-invocation: true
 allowed-tools: Bash(gh *), Bash(git *), Read, Monitor, Skill
 argument-hint: [PR番号]
 ---
