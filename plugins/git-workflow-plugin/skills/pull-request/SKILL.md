@@ -111,22 +111,22 @@ PR作成前の確認事項:
 
 デフォルトテンプレートは `references/pr-template.md` を参照。
 
-## PR作成後のレビュー監視
+## PR作成後の監視
 
-PR作成成功後に `copilot-review-watch` スキルを起動してCopilot等のレビュー完了をバックグラウンド監視する。
+PR作成成功後に `pr-watch` スキルを起動してCI完了とCopilot等のレビュー完了をバックグラウンド監視する。
 
 ### 起動条件
 
-- `.pr-templates/.pr-template.yml` の `review_watch.enabled` を参照する
+- `.pr-templates/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を参照する
 - `false` に明示されている場合は監視しない
 - `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
 ### 起動手順
 
-1. `.pr-review-fix/.pr-review-fix.yml` の `review-watch.reviewers` を読む（無ければ `["copilot"]` をデフォルト）
+1. `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。いずれも無ければ `["copilot"]` をデフォルト）
 2. 対象レビュアーを PR に追加する
    ```bash
    gh pr edit <PR番号> --add-reviewer <reviewer1>,<reviewer2>,...
    ```
    - Copilot を追加する場合のハンドルは `copilot-pull-request-reviewer` 固定
-3. `Skill` ツールで `copilot-review-watch <PR番号>` を呼び出し、以降は `copilot-review-watch` の仕様に従う
+3. `Skill` ツールで `pr-watch <PR番号>` を呼び出し、以降は `pr-watch` の仕様に従う

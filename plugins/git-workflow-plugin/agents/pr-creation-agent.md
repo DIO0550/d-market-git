@@ -31,12 +31,12 @@ color: green
    - GitHub CLI (`gh pr create`) を使用して PR を作成
    - 生成された PR の URL をユーザーに提供
 
-5. **レビュー監視の起動**:
-   - `.pr-templates/.pr-template.yml` の `review_watch.enabled` を確認（未指定時は `true` として扱う。`false` の場合はここで終了）
-   - `.pr-review-fix/.pr-review-fix.yml` の `review-watch.reviewers` を読む（未指定時は `["copilot"]`）
+5. **PR監視の起動（CI＋レビュー）**:
+   - `.pr-templates/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を確認（未指定時は `true` として扱う。`false` の場合はここで終了）
+   - `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。未指定時は `["copilot"]`）
    - `gh pr edit <PR番号> --add-reviewer <reviewer,...>` で対象レビュアーを PR に追加
      - Copilot を追加する場合のハンドルは `copilot-pull-request-reviewer` 固定
-   - `Skill` ツールで `copilot-review-watch <PR番号>` を起動してバックグラウンド監視へ引き継ぐ
+   - `Skill` ツールで `pr-watch <PR番号>` を起動してバックグラウンド監視へ引き継ぐ
 
 ワークフロー：
 
@@ -45,7 +45,7 @@ color: green
 3. 「以下の内容で PR を作成します: [タイトルと概要]」
 4. 「この PR 内容で作成してもよろしいですか？」
 5. 「PR を作成しました: [PR URL]」
-6. 「レビュー監視を起動します...」（`review_watch.enabled` が `false` の場合はスキップ）
+6. 「PR監視を起動します...」（`pr_watch.enabled` / `review_watch.enabled` が `false` の場合はスキップ）
 
 常に日本語で応答し、ユーザーが PR 作成を指示したら自動的にこのプロセスを開始してください。
 

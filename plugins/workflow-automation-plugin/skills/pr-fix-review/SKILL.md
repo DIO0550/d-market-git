@@ -28,7 +28,7 @@ PRのレビュー指摘を1つずつ修正するスキル。
    ↓
 8. サマリー報告
    ↓
-9. copilot-review-watch でレビュー監視を起動
+9. pr-watch でPR監視を起動
 ```
 
 ### タスク管理ルール
@@ -69,10 +69,13 @@ resolve-reply:
 re-request-review:
   mode: skip             # プッシュ後のレビュー再依頼: auto / skip / ask（デフォルト: skip）
 
-review-watch:
-  reviewers:
-    - copilot            # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
-  on-unresolved: notify  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ（デフォルト: notify）
+pr-watch:
+  ci:
+    on-failure: notify   # auto: pr-ci-fix へ自動チェーン / notify: 報告のみ（デフォルト: notify）
+  review:
+    reviewers:
+      - copilot          # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
+    on-unresolved: notify  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ（デフォルト: notify）
   poll-interval: 60      # ポーリング間隔（秒、デフォルト: 60）
 ```
 
@@ -82,13 +85,17 @@ review-watch:
   - `auto`: `gh pr view` で取得した全レビュアーへ自動で再依頼する
   - `skip`: 再依頼しない（従来動作）
   - `ask`:  プッシュ直後にレビュアー一覧を提示し、ユーザーに再依頼するか確認する
-- `review-watch`: `copilot-review-watch` スキルが参照する設定（PR 作成後のレビュー完了待ち）
-  - `reviewers`: 監視対象レビュアーのログイン名トークン（配列）。**部分一致・大文字小文字無視**。`copilot` の 1 語で `Copilot` / `copilot-pull-request-reviewer` の両方にマッチする
-  - `on-unresolved`: 未解決スレッドを検知したときの挙動
-    - `auto`: `pr-fix-review <PR番号>` を自動チェーン呼び出しする（本スキルを `copilot-review-watch` から起動されるエントリポイントとして利用する）
+- `pr-watch`: `pr-watch` スキルが参照する設定（PR 作成後のCI・レビュー完了待ち）
+  - `ci.on-failure`: CI失敗を検知したときの挙動
+    - `auto`: `pr-ci-fix <PR番号>` を自動チェーン呼び出しする
+    - `notify`: 失敗したチェック名と詳細URLを報告して終了する（デフォルト）
+  - `review.reviewers`: 監視対象レビュアーのログイン名トークン（配列）。**部分一致・大文字小文字無視**。`copilot` の 1 語で `Copilot` / `copilot-pull-request-reviewer` の両方にマッチする
+  - `review.on-unresolved`: 未解決スレッドを検知したときの挙動
+    - `auto`: `pr-fix-review <PR番号>` を自動チェーン呼び出しする（本スキルを `pr-watch` から起動されるエントリポイントとして利用する）
     - `notify`: 指摘件数と `path:line` を報告して監視を終了する（デフォルト）
   - `poll-interval`: 監視スクリプトのポーリング間隔（秒）。デフォルト 60
-- 設定ファイルが存在しない、または各キーが無い場合はそれぞれ「返信なし」「再依頼なし」「監視対象 copilot / on-unresolved=notify / poll-interval=60」（従来の動作）とみなす
+- `pr-watch` セクションが存在せず `review-watch` セクションがある場合はフォールバックする（後方互換）
+- 設定ファイルが存在しない、または各キーが無い場合はそれぞれ「返信なし」「再依頼なし」「CI失敗時=notify / 監視対象 copilot / on-unresolved=notify / poll-interval=60」（従来の動作）とみなす
 
 ## 妥当性チェック（指摘の検証）
 
@@ -229,20 +236,20 @@ review-watch:
      gh pr edit <PR番号> --add-reviewer copilot-pull-request-reviewer
      ```
 
-## プッシュ後のレビュー監視
+## プッシュ後のPR監視
 
-全修正のプッシュとレビュー再依頼が完了した後、`copilot-review-watch` スキルを起動してCopilot等のレビュー完了をバックグラウンド監視する。
+全修正のプッシュとレビュー再依頼が完了した後、`pr-watch` スキルを起動してCI完了とCopilot等のレビュー完了をバックグラウンド監視する。
 
 ### 起動条件
 
-- `.pr-review-fix/.pr-review-fix.yml` の `review-watch.enabled` を参照する
-- `false` に明示されている場合は監視しない
+- `.pr-review-fix/.pr-review-fix.yml` の `pr-watch` セクション（または `review-watch`）を参照する
+- `enabled` が `false` に明示されている場合は監視しない
 - `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
 ### 起動手順
 
-1. `.pr-review-fix/.pr-review-fix.yml` の `review-watch.reviewers` を読む（無ければ `["copilot"]` をデフォルト）
-2. `Skill` ツールで `copilot-review-watch <PR番号>` を呼び出し、以降は `copilot-review-watch` の仕様に従う
+1. `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。無ければ `["copilot"]` をデフォルト）
+2. `Skill` ツールで `pr-watch <PR番号>` を呼び出し、以降は `pr-watch` の仕様に従う
 
 ## コマンド実行規約
 

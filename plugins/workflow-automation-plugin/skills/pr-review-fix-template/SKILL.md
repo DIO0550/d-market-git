@@ -53,21 +53,31 @@ argument-hint: (引数なし)
 
 選択結果を `re-request-review.mode` として設定ファイルに書き込む。
 
-### Q4: レビュー監視の未解決時挙動
+### Q4: CI失敗時の挙動
 
-`copilot-review-watch` スキルが PR 作成後にレビュー完了を待ち受ける際、未解決スレッドを検知したときの挙動を指定する。
+`pr-watch` スキルがCI完了を待ち受ける際、CIが失敗したときの挙動を指定する。
+
+> CIが失敗したらどう動きますか？
+> 1. notify: 失敗内容を報告して終了する（デフォルト）
+> 2. auto:   `pr-ci-fix` を自動起動して修正フローへ入る
+
+選択結果を `pr-watch.ci.on-failure` として設定ファイルに書き込む。
+
+### Q5: レビュー未解決時の挙動
+
+`pr-watch` スキルがレビュー完了を待ち受ける際、未解決スレッドを検知したときの挙動を指定する。
 
 > 未解決指摘を検知したらどう動きますか？
 > 1. notify: 件数と箇所を報告して終了する（デフォルト）
 > 2. auto:   `pr-fix-review` を自動起動して修正フローへ入る
 
-選択結果を `review-watch.on-unresolved` として設定ファイルに書き込む。監視対象レビュアー (`reviewers`) とポーリング間隔 (`poll-interval`) はデフォルトテンプレートの値 (`["copilot"]` / `60`) をそのまま書き出す（高度な設定はユーザーが生成後に手動編集する想定）。
+選択結果を `pr-watch.review.on-unresolved` として設定ファイルに書き込む。監視対象レビュアー (`reviewers`) とポーリング間隔 (`poll-interval`) はデフォルトテンプレートの値 (`["copilot"]` / `60`) をそのまま書き出す（高度な設定はユーザーが生成後に手動編集する想定）。
 
 ## 生成する設定ファイル
 
 パス: `{プロジェクトルート}/.pr-review-fix/.pr-review-fix.yml`
 
-最終的な YAML は `resolve-reply`（Q1・Q2 の結果）、`re-request-review`（Q3 の結果）、`review-watch`（Q4 の結果）の 3 セクションを常に合成して出力する。以下は各セクションのパターン。
+最終的な YAML は `resolve-reply`（Q1・Q2 の結果）、`re-request-review`（Q3 の結果）、`pr-watch`（Q4・Q5 の結果）の 3 セクションを常に合成して出力する。以下は各セクションのパターン。
 
 ### `resolve-reply` セクションのパターン
 
@@ -110,17 +120,23 @@ re-request-review:
   mode: {skip | auto | ask}
 ```
 
-### `review-watch` セクション
+### `pr-watch` セクション
 
-Q4 の回答を `on-unresolved` に書き込む。`reviewers` と `poll-interval` はデフォルト値をそのまま出力する。
+Q4 の回答を `ci.on-failure` に、Q5 の回答を `review.on-unresolved` に書き込む。`reviewers` と `poll-interval` はデフォルト値をそのまま出力する。
 
 ```yaml
-review-watch:
-  # 監視対象レビュアー（部分一致・大文字小文字無視）
-  reviewers:
-    - copilot
-  # auto: pr-fix-review へ自動チェーン / notify: 報告のみ
-  on-unresolved: {notify | auto}
+pr-watch:
+  # CI監視設定
+  ci:
+    # auto: pr-ci-fix へ自動チェーン / notify: 報告のみ
+    on-failure: {notify | auto}
+  # レビュー監視設定
+  review:
+    # 監視対象レビュアー（部分一致・大文字小文字無視）
+    reviewers:
+      - copilot
+    # auto: pr-fix-review へ自動チェーン / notify: 報告のみ
+    on-unresolved: {notify | auto}
   # ポーリング間隔（秒）
   poll-interval: 60
 ```
@@ -137,10 +153,13 @@ resolve-reply:
 re-request-review:
   mode: ask
 
-review-watch:
-  reviewers:
-    - copilot
-  on-unresolved: auto
+pr-watch:
+  ci:
+    on-failure: notify
+  review:
+    reviewers:
+      - copilot
+    on-unresolved: auto
   poll-interval: 60
 ```
 

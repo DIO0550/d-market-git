@@ -15,15 +15,22 @@ re-request-review:
   # ask:  プッシュ後にユーザーへ確認する
   mode: skip
 
-# PR作成後のレビュー完了待ち監視設定（copilot-review-watch スキルが参照）
-review-watch:
-  # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
-  # "copilot" の1語で Copilot / copilot-pull-request-reviewer の両方にマッチする
-  reviewers:
-    - copilot
-  # 未解決スレッドを検知したときの挙動
-  # auto:   pr-fix-review スキルへ自動チェーン（即座に修正フローへ入る）
-  # notify: 指摘件数と path:line を報告して終了（デフォルト）
-  on-unresolved: notify
+# PR作成後の監視設定（pr-watch スキルが参照）
+pr-watch:
+  # CI監視設定
+  ci:
+    # auto:   pr-ci-fix スキルへ自動チェーン（即座に修正フローへ入る）
+    # notify: 失敗を報告して終了（デフォルト）
+    on-failure: notify
+  # レビュー監視設定
+  review:
+    # 監視対象レビュアーのログイン名トークン（部分一致・大文字小文字無視）
+    # "copilot" の1語で Copilot / copilot-pull-request-reviewer の両方にマッチする
+    reviewers:
+      - copilot
+    # 未解決スレッドを検知したときの挙動
+    # auto:   pr-fix-review スキルへ自動チェーン（即座に修正フローへ入る）
+    # notify: 指摘件数と path:line を報告して終了（デフォルト）
+    on-unresolved: notify
   # 監視スクリプトのポーリング間隔（秒、デフォルト: 60）
   poll-interval: 60
