@@ -49,24 +49,24 @@
 ```
 
 <!--
-例 (Mermaid):
+例 (Mermaid flowchart — デフォルトはこれ):
 
 ```mermaid
-stateDiagram-v2
-    [*] --> Draft: 注文作成
-    Draft --> Pending: 確認
-    Pending --> Paid: 決済完了
-    Pending --> Cancelled: キャンセル
-    Draft --> Cancelled: キャンセル
-    Paid --> Shipped: 発送
-    Shipped --> Delivered: 配達完了
-    Delivered --> [*]
-    Cancelled --> [*]
+flowchart TD
+    Start([注文作成]) --> Draft[Draft]
+    Draft -->|確認| Pending[Pending]
+    Draft -->|キャンセル| Cancelled[Cancelled]:::new
+    Pending -->|決済完了| Paid[Paid]
+    Pending -->|キャンセル| Cancelled
+    Paid -->|発送| Shipped[Shipped]
+    Shipped -->|配達完了| Delivered[Delivered]
+    Delivered --> End([終了])
+    Cancelled --> End
 
-    note right of Cancelled: [NEW] 今回追加
+    classDef new fill:#ffe4b5,stroke:#d97706,stroke-width:2px
 ```
 
-例 (ASCII art):
+例 (ASCII art — flowchart で収まらない場合のフォールバック):
 
 ```
                  ┌─────────┐
