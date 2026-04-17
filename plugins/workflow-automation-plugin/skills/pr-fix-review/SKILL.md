@@ -28,8 +28,13 @@ PRのレビュー指摘を1つずつ修正するスキル。
    ↓
 8. サマリー報告
    ↓
-9. pr-watch でPR監視を起動
+9. pr-watch でPR監視を起動（--from-watch 時はスキップ）
 ```
+
+## 引数
+
+- `<PR番号>` 必須。修正対象のPR
+- `--from-watch` 省略可。pr-watch からの自動チェーン呼び出し時に指定する。指定時はステップ9（pr-watch 起動）をスキップする（監視は呼び出し元の pr-watch が継続中のため）
 
 ### タスク管理ルール
 
@@ -240,13 +245,21 @@ pr-watch:
 
 全修正のプッシュとレビュー再依頼が完了した後、`pr-watch` スキルを起動してCI完了とCopilot等のレビュー完了をバックグラウンド監視する。
 
-### 起動条件
+### `--from-watch` 引数が指定されている場合
+
+pr-watch からの自動チェーン呼び出し（`on-unresolved=auto`）の場合、監視は呼び出し元の pr-watch が既に継続実行中のため、**このセクションの処理をすべてスキップする**。pr-fix-review はサマリー報告で完了し、制御を pr-watch に戻す。
+
+### `--from-watch` 引数が指定されていない場合
+
+従来どおり pr-watch を起動する。
+
+#### 起動条件
 
 - `.pr-review-fix/.pr-review-fix.yml` の `pr-watch` セクション（または `review-watch`）を参照する
 - `enabled` が `false` に明示されている場合は監視しない
 - `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
-### 起動手順
+#### 起動手順
 
 1. `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。無ければ `["copilot"]` をデフォルト）
 2. `Skill` ツールで `pr-watch <PR番号>` を呼び出し、以降は `pr-watch` の仕様に従う

@@ -18,10 +18,13 @@ PRに対してCI完了とレビュー完了をバックグラウンドで待ち�
    （pr-watch が無ければ review-watch にフォールバック）
    ↓
 3. Monitor ツールで監視スクリプトを起動
+   （auto モードでは REVIEW_LOOP / CI_LOOP を有効化）
    ↓
 4. ストリーミング行の行頭タグで分岐（CI_* / REVIEW_*）
+   - auto: 即座にアクション → 監視継続（ループ）
+   - notify: 記録して両方の終了条件を待つ
    ↓
-5. 両方が終了条件に達したらアクション実行
+5. 両方が最終的な成功状態に達したら終了
 ```
 
 ## 引数
@@ -92,6 +95,8 @@ Monitor tool:
     WATCH_REVIEWERS=<reviewers をカンマ区切りに変換>
     WATCH_CI=true
     POLL_INTERVAL=<poll-interval>
+    REVIEW_LOOP=<"true" if review.on-unresolved=auto, else "false">
+    CI_LOOP=<"true" if ci.on-failure=auto, else "false">
 ```
 
 スクリプトは stdout に以下のいずれかを1行ずつ出力する:
@@ -118,23 +123,38 @@ Monitor tool:
 
 ### 3. 行頭タグで分岐
 
-CI とレビューの状態を独立して追跡する。
+CI とレビューの状態を独立して追跡する。監視スクリプトは状態変化時のみイベントを出力する（同一タグの連続出力は抑制される）。
 
-- `CI_PENDING` / `REVIEW_PENDING`: 何もしない（次の行を待つ）
-- `CI_PASSED`: CIを「完了（成功）」として記録
-- `CI_FAILED`: CIを「完了（失敗）」として記録
-- `REVIEW_DONE`: レビューを「完了（成功）」として記録
-- `REVIEW_UNRESOLVED`: レビューを「完了（未解決あり）」として記録
+#### 即時アクションモード（auto）
 
-**両方が終了条件に達したら**、監視を停止して以下のアクション優先順位に従う:
+`REVIEW_LOOP=true`（`review.on-unresolved=auto`）の場合、監視スクリプトは `REVIEW_UNRESOLVED` でも終了しない。以下の流れで継続監視する:
 
-1. CI失敗 + `ci.on-failure=auto` → `Skill` ツールで `pr-ci-fix <PR番号>` を呼ぶ
-2. CI失敗 + `ci.on-failure=notify` → 失敗したチェック名と詳細URLをユーザーへ報告
-3. レビュー未解決 + `review.on-unresolved=auto` → `Skill` ツールで `pr-fix-review <PR番号>` を呼ぶ
-4. レビュー未解決 + `review.on-unresolved=notify` → `locations` の `path:line` と件数をユーザーへ報告
-5. 両方成功 → 成功を報告して終了
+1. `REVIEW_UNRESOLVED` を受信 → 即座に `Skill` ツールで `pr-fix-review <PR番号> --from-watch` を呼ぶ
+2. pr-fix-review が修正をプッシュし、レビュー再依頼する
+3. 監視スクリプトは次のポーリングで `REVIEW_PENDING`（レビュー再依頼中）と `CI_PENDING`（新CI実行中）を検知し、状態をリセットする
+4. 再び `REVIEW_UNRESOLVED` または `REVIEW_DONE` が来るまでポーリング継続
+5. `REVIEW_DONE` で全スレッド解決を確認 → レビュー側は終了
 
-CI失敗が優先（CIを先に修正するとレビュー対応がスムーズになることが多いため）。
+`CI_LOOP=true`（`ci.on-failure=auto`）の場合も同様:
+
+1. `CI_FAILED` を受信 → 即座に `Skill` ツールで `pr-ci-fix <PR番号>` を呼ぶ
+2. pr-ci-fix が修正をプッシュする
+3. 監視スクリプトは `CI_PENDING` を検知し、状態をリセットする
+4. 再び `CI_FAILED` または `CI_PASSED` が来るまでポーリング継続
+
+**重要**: `--from-watch` 引数を付けることで、pr-fix-review が完了後に pr-watch を再起動しないようにする（監視は既に実行中のため）。
+
+#### 通知モード（notify）
+
+`on-unresolved=notify` / `on-failure=notify` の場合、監視スクリプトは従来どおり `REVIEW_UNRESOLVED` / `CI_FAILED` を終了条件として扱い、両方が終了条件に達したら監視を停止する。
+
+**両方が終了条件に達したら**、以下のアクション優先順位に従う:
+
+1. CI失敗 + `ci.on-failure=notify` → 失敗したチェック名と詳細URLをユーザーへ報告
+2. レビュー未解決 + `review.on-unresolved=notify` → `locations` の `path:line` と件数をユーザーへ報告
+3. 両方成功 → 成功を報告して終了
+
+auto モードでは検知時に即座にアクションを起こすため、「両方が終了条件に達してからアクション」という流れにはならない。
 
 ## 注意事項
 
