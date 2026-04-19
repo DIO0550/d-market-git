@@ -15,13 +15,26 @@ if [ -z "$command" ]; then
     exit 0
 fi
 
+# heredoc コンテンツを除去してからチェックする（コミットメッセージ本文の誤検知防止）
+check_target="$command"
+if echo "$command" | grep -qE '<<'; then
+    delim=$(echo "$command" | sed -n "s/.*<<-*[[:space:]]*['\"\`]*\([A-Za-z_][A-Za-z_0-9]*\)['\"\`]*.*/\1/p" | head -1)
+    if [ -n "$delim" ]; then
+        check_target=$(echo "$command" | awk -v d="$delim" '
+            /<</ && !skip { skip=1; print; next }
+            skip && $0 ~ "^[[:space:]]*"d"[[:space:]]*$" { skip=0; next }
+            !skip { print }
+        ')
+    fi
+fi
+
 # git add の危険なパターンをチェック
 # 対象: git add -A, git add --all, git add ., git add -a
 # git add -Aや--allは意図しないファイル(.env, credentials等)をステージングするリスクがある
 # プレフィックスコマンド(command, env, sudo等)や-Aが先頭引数でないケース(-v -A等)にも対応
-if echo "$command" | grep -qE '\bgit\s+add\b.*(\s-[a-zA-Z]*A[a-zA-Z]*\b|\s--all\b|\s\.\s|\s\.$)' \
-   || echo "$command" | grep -qE '\bgit\s+add\s+(-A\b|--all\b|\.\s|\.$)' \
-   || echo "$command" | grep -qE '\bgit\s+add\s+-a\b'; then
+if echo "$check_target" | grep -qE '\bgit\s+add\b.*(\s-[a-zA-Z]*A[a-zA-Z]*\b|\s--all\b|\s\.\s|\s\.$)' \
+   || echo "$check_target" | grep -qE '\bgit\s+add\s+(-A\b|--all\b|\.\s|\.$)' \
+   || echo "$check_target" | grep -qE '\bgit\s+add\s+-a\b'; then
     jq -n '{
         hookSpecificOutput: {
             hookEventName: "PreToolUse",

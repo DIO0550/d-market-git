@@ -97,8 +97,9 @@ if [ "$is_git" = true ] && echo "$check_target" | grep -qE '\|'; then
 fi
 
 # git add の危険パターンは allow を返さず、後続 hook（no-git-add-all.sh）に委ねる
-if echo "$command" | grep -qE '\bgit\s+add\b.*(\s-[a-zA-Z]*A[a-zA-Z]*\b|\s--all\b|\s\.\s|\s\.$|\s-a\b)' \
-   || echo "$command" | grep -qE '\bgit\s+add\s+(-A\b|--all\b|\.\s|\.$|-a\b)'; then
+# heredoc 除去済みの check_target を使い、コミットメッセージ本文の誤検知を防ぐ
+if echo "$check_target" | grep -qE '\bgit\s+add\b.*(\s-[a-zA-Z]*A[a-zA-Z]*\b|\s--all\b|\s\.\s|\s\.$|\s-a\b)' \
+   || echo "$check_target" | grep -qE '\bgit\s+add\s+(-A\b|--all\b|\.\s|\.$|-a\b)'; then
     exit 0
 fi
 

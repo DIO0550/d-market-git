@@ -1,7 +1,7 @@
 ---
 name: pr-watch
 description: PRのCI完了とレビュー完了をMonitorツール経由でバックグラウンド監視し、失敗・未解決指摘があれば次のアクションにチェーンするスキル。PR作成直後やプッシュ後にCI通過とレビュー完了を待ち受ける場面で使う。「CI監視」「レビュー監視」「PR監視して」などのリクエスト時に使用。
-allowed-tools: Bash(gh *), Bash(git *), Read, Monitor, Skill
+allowed-tools: Bash(gh *), Bash(git *), Bash(*monitor-pr.sh*), Read, Monitor, Skill
 argument-hint: [PR番号]
 ---
 
