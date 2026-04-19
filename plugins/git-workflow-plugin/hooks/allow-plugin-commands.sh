@@ -31,6 +31,18 @@ elif echo "$command" | grep -qE '^\s*git\s'; then
     is_git=true
 fi
 
+# pr-watch の監視スクリプト実行を許可（env vars/timeout 等のプレフィックス付きでもマッチ）
+if echo "$command" | grep -qE 'monitor-pr\.sh\b'; then
+    jq -n '{
+        hookSpecificOutput: {
+            hookEventName: "PreToolUse",
+            permissionDecision: "allow",
+            permissionDecisionReason: "プラグインスクリプトの実行を許可"
+        }
+    }'
+    exit 0
+fi
+
 # プラグイン無関係なコマンドは無視（出力なし→通常の権限フローに委ねる）
 if [ "$is_gh" = false ] && [ "$is_git" = false ]; then
     exit 0
