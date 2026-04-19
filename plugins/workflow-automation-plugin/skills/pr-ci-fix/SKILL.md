@@ -1,14 +1,18 @@
 ---
 name: pr-ci-fix
 description: PRのCIエラー修正スキル。ビルドエラー・テスト失敗・Lint/型エラーを確認し、1つずつ順番に修正してコミットする。「CIエラー修正」「CI直して」「テスト失敗を修正」などのリクエスト時に使用。
-disable-model-invocation: true
-allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write
+allowed-tools: Bash(gh *), Bash(git *), Read, Grep, Glob, Edit, Write, Skill
 argument-hint: [PR番号]
 ---
 
 # CIエラー修正
 
 PRのCIエラーを1つずつ修正するスキル。
+
+## 引数
+
+- `<PR番号>` 必須。修正対象のPR
+- `--from-watch` 省略可。pr-watch からの自動チェーン呼び出し時に指定する。指定時はステップ7（pr-watch 起動）をスキップする（監視は呼び出し元の pr-watch が継続中のため）
 
 ## ワークフロー
 
@@ -21,7 +25,11 @@ PRのCIエラーを1つずつ修正するスキル。
    ↓
 4. 次のタスクへ（全完了まで繰り返し）
    ↓
-5. サマリー報告
+5. 全修正完了後に git push
+   ↓
+6. サマリー報告
+   ↓
+7. pr-watch でPR監視を起動（--from-watch 時はスキップ）
 ```
 
 ### タスク管理ルール
@@ -69,6 +77,33 @@ PRのCIエラーを1つずつ修正するスキル。
 ```
 🐛 [Bug fix]: CIエラー修正 - {エラー内容}
 ```
+
+## プッシュとPR監視
+
+全タスクが completed になった後、修正コミットをリモートへプッシュし、PR監視を起動する。
+
+### 手順
+
+1. **プッシュ**
+   ```bash
+   git push
+   ```
+
+2. **サマリー報告**（後述の報告フォーマットに従う）
+
+3. **PR監視の起動**
+
+#### `--from-watch` 引数が指定されている場合
+
+pr-watch からの自動チェーン呼び出し（`on-failure=auto`）の場合、監視は呼び出し元の pr-watch が既に継続実行中のため、**このセクションの処理をすべてスキップする**。pr-ci-fix はサマリー報告で完了し、制御を pr-watch に戻す。
+
+#### `--from-watch` 引数が指定されていない場合
+
+従来どおり pr-watch を起動する。
+
+- `.pr-review-fix/.pr-review-fix.yml` の `pr-watch` セクション（または `review-watch`）を参照する
+- `enabled` が `false` に明示されている場合は監視しない
+- `true` または未指定の場合は `Skill` ツールで `pr-watch <PR番号>` を呼び出す
 
 ## 完了時の報告
 
