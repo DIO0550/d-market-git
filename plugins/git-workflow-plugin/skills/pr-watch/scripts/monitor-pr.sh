@@ -59,7 +59,7 @@ while true; do
   # --- CI チェック ---
   if [ "$WATCH_CI" = "true" ]; then
     ci_line=$(gh pr checks "$PR" -R "${OWNER}/${REPO}" \
-      --json name,state,conclusion,detailsUrl 2>/dev/null \
+      --json name,bucket,link 2>/dev/null \
       | jq -r --argjson empty_count "$ci_empty_count" --argjson grace "$CI_EMPTY_GRACE" '
         if length == 0 then
           if $empty_count >= ($grace - 1) then
@@ -67,16 +67,16 @@ while true; do
           else
             "CI_PENDING checks_in_progress=waiting_for_checks"
           end
-        elif any(.[]; .state == "QUEUED" or .state == "IN_PROGRESS" or .state == "PENDING") then
+        elif any(.[]; .bucket == "pending") then
           "CI_PENDING checks_in_progress=" +
-          ([.[] | select(.state == "QUEUED" or .state == "IN_PROGRESS" or .state == "PENDING") | .name] | join(","))
-        elif all(.[]; .conclusion == "SUCCESS" or .conclusion == "NEUTRAL" or .conclusion == "SKIPPED") then
+          ([.[] | select(.bucket == "pending") | .name] | join(","))
+        elif all(.[]; .bucket == "pass" or .bucket == "skipping") then
           "CI_PASSED"
         else
           "CI_FAILED failed_checks=" +
-          ([.[] | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT" or .conclusion == "CANCELLED" or .conclusion == "ACTION_REQUIRED") | .name] | join(",")) +
+          ([.[] | select(.bucket == "fail" or .bucket == "cancel") | .name] | join(",")) +
           " details=" +
-          ([.[] | select(.conclusion == "FAILURE" or .conclusion == "TIMED_OUT" or .conclusion == "CANCELLED" or .conclusion == "ACTION_REQUIRED") | .detailsUrl // ""] | map(select(. != "")) | join(","))
+          ([.[] | select(.bucket == "fail" or .bucket == "cancel") | .link // ""] | map(select(. != "")) | join(","))
         end
       ')
 
