@@ -1,6 +1,6 @@
 ---
 name: issue-template
-description: Issueフォーマット定義YAMLを生成する。`.spec-to-issues/issue-template.yml`にタイプ別本文テンプレート・タイトル形式・ラベル体系・ルールを定義。ユーザーが明示的に呼び出した場合のみ使用。
+description: Issueフォーマット定義YAMLを生成する。`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml`にタイプ別本文テンプレート・タイトル形式・ラベル体系・ルールを定義。ユーザーが明示的に呼び出した場合のみ使用。
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: Read, Write, Glob, AskUserQuestion
@@ -13,7 +13,7 @@ argument-hint: [プロジェクトパス（省略時はカレント）]
 
 ## 概要
 
-`references/default-template.yml` をベースに、プロジェクトの `.spec-to-issues/issue-template.yml` にテンプレートを生成する。
+`references/default-template.yml` をベースに、プロジェクトの `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml` にテンプレートを生成する。
 このYAMLは `spec-to-issues` スキルがIssue作成時に参照するフォーマット定義として機能する。
 
 ## 生成ワークフロー
@@ -21,11 +21,11 @@ argument-hint: [プロジェクトパス（省略時はカレント）]
 ```
 1. references/default-template.yml を読み込む
    ↓
-2. 既存の .spec-to-issues/issue-template.yml があるか確認
+2. 既存の ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml があるか確認
    ↓
 3. ユーザーにカスタマイズ内容をヒアリング
    ↓
-4. .spec-to-issues/issue-template.yml を生成
+4. ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml を生成
 ```
 
 ### Step 1: デフォルトテンプレートの読み込み
@@ -34,7 +34,7 @@ argument-hint: [プロジェクトパス（省略時はカレント）]
 
 ### Step 2: 既存テンプレートの確認
 
-`.spec-to-issues/issue-template.yml` が既に存在する場合:
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml` が既に存在する場合:
 - 内容を読み込み、ユーザーに「上書き」か「既存をベースに更新」か確認する
 - 「更新」の場合は既存の設定を引き継ぐ
 
@@ -49,7 +49,7 @@ argument-hint: [プロジェクトパス（省略時はカレント）]
 
 ### Step 4: YAMLの生成
 
-ヒアリング結果を反映して `.spec-to-issues/issue-template.yml` を生成する。
+ヒアリング結果を反映して `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml` を生成する。
 
 ## YAML構造
 
@@ -103,12 +103,12 @@ rules:
 
 ## spec-to-issues スキルとの連携
 
-このスキルで生成した `.spec-to-issues/issue-template.yml` は、`spec-to-issues` スキルが自動的に参照する。
+このスキルで生成した `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml` は、`spec-to-issues` スキルが自動的に参照する。
 
 ### テンプレート解決の優先順位（spec-to-issues側）
 
 ```
-1. .spec-to-issues/issue-template.yml が存在する → YAMLの定義を使用
+1. ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issue-template.yml が存在する → YAMLの定義を使用
 2. YAMLが存在しない → references/templates/*.template.md にフォールバック
 ```
 

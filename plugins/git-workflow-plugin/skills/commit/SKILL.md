@@ -10,7 +10,7 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 
 ## テンプレート参照
 
-プロジェクトに `.commit-templates/.commit-template.yml` が存在する場合、そのテンプレートに定義されたタイプやルールを優先して使用する。テンプレートがない場合は、以下のデフォルトルールに従う。
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` が存在する場合、そのテンプレートに定義されたタイプやルールを優先して使用する。テンプレートがない場合は、以下のデフォルトルールに従う。
 
 ## コミットメッセージ形式
 

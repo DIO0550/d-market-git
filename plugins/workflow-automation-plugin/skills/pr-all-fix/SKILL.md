@@ -63,7 +63,7 @@ PRのレビュー指摘事項とCIエラーを1つずつ修正するスキル。
 
 ## 設定ファイル
 
-プロジェクトに `.pr-review-fix/.pr-review-fix.yml` が存在する場合、その設定を読み込んで動作を制御する。
+プロジェクトに `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` が存在する場合、その設定を読み込んで動作を制御する。
 
 ### 設定項目
 
@@ -115,7 +115,7 @@ resolve-reply:
    ```
 
 2. **修正＆コミット後、設定に応じてスレッドに返信する**
-   - `.pr-review-fix/.pr-review-fix.yml` を読み込み、`resolve-reply.enabled` が `true` の場合のみ返信する
+   - `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` を読み込み、`resolve-reply.enabled` が `true` の場合のみ返信する
    - `resolve-reply.template` がある場合: テンプレートの `{commit_hash}` をコミットのショートハッシュに置換して返信
    - `resolve-reply.template` がない場合: 指摘内容と修正内容を踏まえて、AIが簡潔な返信メッセージを生成して返信（コミットハッシュは必ず含める）
    ```bash
@@ -145,7 +145,7 @@ resolve-reply:
 
 ## コミット形式
 
-プロジェクトに `.commit-templates/.commit-template.yml` が存在する場合、そのテンプレートのルールを優先して使用する。テンプレートがない場合は以下のデフォルト形式に従う。
+git-workflow-plugin の `.plugin-workspace/commit/.commit-template.yml` が存在する場合、そのテンプレートのルールを優先して使用する（Glob: `**/git-workflow-plugin/.plugin-workspace/commit/.commit-template.yml`）。テンプレートがない場合は以下のデフォルト形式に従う。
 
 ```
 🐛 [Bug fix]: CIエラー修正 - {エラー内容}

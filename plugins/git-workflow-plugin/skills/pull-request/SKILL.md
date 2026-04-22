@@ -12,10 +12,10 @@ PRテンプレートに沿ったプルリクエスト説明文の作成を支援
 
 PR本文を作成する際は、以下の順でテンプレートを参照する。
 
-1. `.pr-templates/.pr-template.yml`
+1. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml`
 2. `references/pr-template.md`（フォールバック）
 
-`.pr-templates/.pr-template.yml` がある場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` がある場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
 
 ## ベースブランチの決定
 
@@ -23,7 +23,7 @@ PR作成時に `--base` フラグでマージ先ブランチを指定する。
 
 ### 決定順序
 
-1. `.pr-templates/.pr-template.yml` の `base_branch` を確認
+1. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の `base_branch` を確認
 2. `"auto"` または未指定の場合 → 親ブランチを自動検出する:
    ```bash
    git log --first-parent --decorate=short --simplify-by-decoration --oneline
@@ -130,13 +130,13 @@ PR作成成功後に `pr-watch` スキルを起動してCI完了とCopilot等の
 
 ### 起動条件
 
-- `.pr-templates/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を参照する
+- `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を参照する
 - `false` に明示されている場合は監視しない
 - `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
 ### 起動手順
 
-1. `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。いずれも無ければ `["copilot"]` をデフォルト）
+1. workflow-automation-plugin の `.plugin-workspace/pull-request/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（Glob: `**/workflow-automation-plugin/.plugin-workspace/pull-request/.pr-review-fix.yml`）（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。いずれも無ければ `["copilot"]` をデフォルト）
 2. 対象レビュアーを PR に追加する
    ```bash
    gh pr edit <PR番号> --add-reviewer <reviewer1>,<reviewer2>,...

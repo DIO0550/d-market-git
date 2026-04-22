@@ -11,13 +11,13 @@ allowed-tools: Read, Write, Glob
 
 ## 概要
 
-`references/default-template.yml` をベースに、プロジェクトの `.pr-templates/.pr-template.yml` にテンプレートを生成する。
+`references/default-template.yml` をベースに、`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` にテンプレートを生成する。
 
 ## 生成ルール
 
 1. `references/default-template.yml` の内容を読み込む
 2. プロジェクトの開発フローに合わせてタイプ・必須項目・チェック項目を調整する
-3. `.pr-templates/.pr-template.yml` として出力する
+3. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` として出力する
 
 ## テンプレート仕様
 
@@ -62,7 +62,7 @@ PRのマージ先ブランチを制御する。`"auto"` を指定すると、`pu
 
 ### pr_watch セクション
 
-PR作成後にCI完了とCopilot等のレビュー完了を自動監視するかを制御するフラグ。`enabled: true` にすると、`pr-creation-agent` が PR 作成成功後に `pr-watch` スキルを起動する。監視対象レビュアー・CI失敗時の挙動・未解決時の挙動・ポーリング間隔は `.pr-review-fix/.pr-review-fix.yml` の `pr-watch` セクションで指定する。
+PR作成後にCI完了とCopilot等のレビュー完了を自動監視するかを制御するフラグ。`enabled: true` にすると、`pr-creation-agent` が PR 作成成功後に `pr-watch` スキルを起動する。監視対象レビュアー・CI失敗時の挙動・未解決時の挙動・ポーリング間隔は workflow-automation-plugin の `.plugin-workspace/pull-request/.pr-review-fix.yml` の `pr-watch` セクションで指定する（Glob: `**/.plugin-workspace/pull-request/.pr-review-fix.yml`）。
 
 後方互換: `pr_watch` が無い場合は `review_watch` にフォールバックする。
 

@@ -14,7 +14,7 @@ PRに対してCI完了とレビュー完了をバックグラウンドで待ち�
 ```
 1. owner/repo/PR番号を解決
    ↓
-2. .pr-review-fix/.pr-review-fix.yml の pr-watch 設定を読む
+2. workflow-automation-plugin の .plugin-workspace/pull-request/.pr-review-fix.yml の pr-watch 設定を読む
    （pr-watch が無ければ review-watch にフォールバック）
    ↓
 3. Monitor ツールで監視スクリプトを起動
@@ -36,7 +36,7 @@ owner/repo は `gh repo view --json owner,name -q '.owner.login + "/" + .name'` 
 
 ## 設定ファイル
 
-`.pr-review-fix/.pr-review-fix.yml` の `pr-watch` セクションを読み込む。
+workflow-automation-plugin の `.plugin-workspace/pull-request/.pr-review-fix.yml` の `pr-watch` セクションを読み込む（Glob: `**/workflow-automation-plugin/.plugin-workspace/pull-request/.pr-review-fix.yml`）。
 
 ```yaml
 pr-watch:
@@ -79,8 +79,9 @@ pr-watch:
 ### 1. 設定読み込み
 
 ```bash
-# 設定ファイルがあれば読む。無ければデフォルトを使う
-CONFIG=.pr-review-fix/.pr-review-fix.yml
+# workflow-automation-plugin の設定ファイルがあれば読む。無ければデフォルトを使う
+# Glob: **/workflow-automation-plugin/.plugin-workspace/pull-request/.pr-review-fix.yml
+CONFIG=$(find "$(dirname "${CLAUDE_PLUGIN_ROOT}")" -path "*/workflow-automation-plugin/.plugin-workspace/pull-request/.pr-review-fix.yml" 2>/dev/null | head -1)
 ```
 
 設定値の取得は `yq` に依存せず、`grep` と `awk` で十分（キー構造が固定のため）。読み取れない場合はデフォルトにフォールバックする。

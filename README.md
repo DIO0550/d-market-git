@@ -106,12 +106,12 @@ PR の CI エラー修正・レビュー指摘修正を自動化するプラグ�
 
 ### テンプレートの初期化（任意）
 
-プロジェクトごとにテンプレートをカスタマイズできます。
+プロジェクトごとにテンプレートをカスタマイズできます。各テンプレートは `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下に生成されます。
 
 ```
-/commit-template    # .commit-templates/.commit-template.yml を生成
-/pr-template        # .pr-templates/.pr-template.yml を生成
-/issue-template     # .spec-to-issues/issue-template.yml を生成
+/commit-template    # .plugin-workspace/commit/.commit-template.yml を生成
+/pr-template        # .plugin-workspace/pull-request/.pr-template.yml を生成
+/issue-template     # .plugin-workspace/issues/issue-template.yml を生成
 ```
 
 ## ディレクトリ構成

@@ -1,6 +1,6 @@
-# `.spec-to-issues/config.yml` 設定スキーマ
+# `config.yml` 設定スキーマ
 
-プロジェクトルートに `.spec-to-issues/config.yml` を配置することで、Issue生成のルールをカスタマイズできます。
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/config.yml` を配置することで、Issue生成のルールをカスタマイズできます。
 全フィールドはオプションです。未指定の場合はデフォルト値が使用されます。
 
 ## 全設定項目

@@ -1,6 +1,6 @@
 ---
 name: pr-review-fix-template
-description: PRレビュー修正の設定ファイル(.pr-review-fix/.pr-review-fix.yml)を対話的に生成するスキル。「pr-review-fixのテンプレート作って」「pr-review-fixの設定を作って」「レビュー修正の設定を初期化して」などのリクエスト時に使用。プロジェクトにまだ設定ファイルがない場合や、設定を変更したい場合に使う。
+description: PRレビュー修正の設定ファイル(${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml)を対話的に生成するスキル。「pr-review-fixのテンプレート作って」「pr-review-fixの設定を作って」「レビュー修正の設定を初期化して」などのリクエスト時に使用。プロジェクトにまだ設定ファイルがない場合や、設定を変更したい場合に使う。
 disable-model-invocation: true
 allowed-tools: Read, Write, Edit, AskUserQuestion
 argument-hint: (引数なし)
@@ -8,16 +8,16 @@ argument-hint: (引数なし)
 
 # PRレビュー修正 設定ファイル生成
 
-`.pr-review-fix/.pr-review-fix.yml` を対話的に作成するスキル。
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` を対話的に作成するスキル。
 
 ## デフォルトテンプレート
 
-`references/default-template.yml` をベースに、プロジェクトの `.pr-review-fix/.pr-review-fix.yml` に設定ファイルを生成する。
+`references/default-template.yml` をベースに、プロジェクトの `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` に設定ファイルを生成する。
 
 ## ワークフロー
 
 1. `references/default-template.yml` の内容を読み込む
-2. プロジェクトルートに既存の `.pr-review-fix/.pr-review-fix.yml` があるか確認する
+2. プロジェクトルートに既存の `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` があるか確認する
    - 既にある場合: 内容を読み込んで表示し、上書きするか確認する
 3. ユーザーに以下を順番に質問する
 4. 回答に基づいて設定ファイルを生成する
@@ -75,7 +75,7 @@ argument-hint: (引数なし)
 
 ## 生成する設定ファイル
 
-パス: `{プロジェクトルート}/.pr-review-fix/.pr-review-fix.yml`
+パス: `{プロジェクトルート}/${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml`
 
 最終的な YAML は `resolve-reply`（Q1・Q2 の結果）、`re-request-review`（Q3 の結果）、`pr-watch`（Q4・Q5 の結果）の 3 セクションを常に合成して出力する。以下は各セクションのパターン。
 

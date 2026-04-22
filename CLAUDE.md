@@ -47,9 +47,14 @@ main, master, production, release, develop, staging ブランチへの直接編�
 
 ## テンプレートファイルの配置規則
 
-プロジェクト利用時にユーザーが生成するテンプレート:
-- `.commit-templates/.commit-template.yml`
-- `.pr-templates/.pr-template.yml`
-- `.spec-to-issues/issue-template.yml`
-- `.spec-to-issues/config.yml`
-- `.pr-review-fix/.pr-review-fix.yml`
+各プラグインが生成するテンプレート・設定ファイルは `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下にカテゴリごとのサブフォルダで配置する:
+
+- git-workflow-plugin:
+  - `.plugin-workspace/commit/.commit-template.yml`
+  - `.plugin-workspace/pull-request/.pr-template.yml`
+- workflow-automation-plugin:
+  - `.plugin-workspace/pull-request/.pr-review-fix.yml`
+- spec-to-issues-plugin:
+  - `.plugin-workspace/issues/issue-template.yml`
+  - `.plugin-workspace/issues/config.yml`
+  - `.plugin-workspace/issues/issues-plan.md`

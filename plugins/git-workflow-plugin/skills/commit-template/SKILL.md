@@ -11,13 +11,13 @@ allowed-tools: Read, Write, Glob
 
 ## 概要
 
-`references/default-template.yml` をベースに、プロジェクトの `.commit-templates/.commit-template.yml` にテンプレートを生成する。
+`references/default-template.yml` をベースに、`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` にテンプレートを生成する。
 
 ## 生成ルール
 
 1. `references/default-template.yml` の内容を読み込む
 2. プロジェクトの要件に応じてタイプを取捨選択する
-3. `.commit-templates/.commit-template.yml` として出力する
+3. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` として出力する
 
 ## テンプレート仕様
 

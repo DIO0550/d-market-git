@@ -62,7 +62,7 @@ PRのレビュー指摘を1つずつ修正するスキル。
 
 ## 設定ファイル
 
-プロジェクトに `.pr-review-fix/.pr-review-fix.yml` が存在する場合、その設定を読み込んで動作を制御する。
+プロジェクトに `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` が存在する場合、その設定を読み込んで動作を制御する。
 
 ### 設定項目
 
@@ -172,7 +172,7 @@ pr-watch:
    ```
 
 2. **修正＆コミット後、設定に応じてスレッドに返信する**
-   - `.pr-review-fix/.pr-review-fix.yml` を読み込み、`resolve-reply.enabled` が `true` の場合のみ返信する
+   - `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` を読み込み、`resolve-reply.enabled` が `true` の場合のみ返信する
    - `resolve-reply.template` がある場合: テンプレートの `{commit_hash}` をコミットのショートハッシュに置換して返信
    - `resolve-reply.template` がない場合: 指摘内容と修正内容を踏まえて、AIが簡潔な返信メッセージを生成して返信（コミットハッシュは必ず含める）
    ```bash
@@ -210,7 +210,7 @@ pr-watch:
    ```
 
 2. **設定値の読み込み**
-   - `.pr-review-fix/.pr-review-fix.yml` の `re-request-review.mode` を読む
+   - `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` の `re-request-review.mode` を読む
    - ファイルまたはキーが存在しない場合は `skip` として扱う
 
 3. **`skip` の場合**
@@ -255,13 +255,13 @@ pr-watch からの自動チェーン呼び出し（`on-unresolved=auto`）の場
 
 #### 起動条件
 
-- `.pr-review-fix/.pr-review-fix.yml` の `pr-watch` セクション（または `review-watch`）を参照する
+- `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` の `pr-watch` セクション（または `review-watch`）を参照する
 - `enabled` が `false` に明示されている場合は監視しない
 - `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
 #### 起動手順
 
-1. `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。無ければ `["copilot"]` をデフォルト）
+1. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。無ければ `["copilot"]` をデフォルト）
 2. `Skill` ツールで `pr-watch <PR番号>` を呼び出し、以降は `pr-watch` の仕様に従う
 
 ## コマンド実行規約
@@ -277,7 +277,7 @@ pr-watch からの自動チェーン呼び出し（`on-unresolved=auto`）の場
 
 ## コミット形式
 
-プロジェクトに `.commit-templates/.commit-template.yml` が存在する場合、そのテンプレートのルールを優先して使用する。テンプレートがない場合は以下のデフォルト形式に従う。
+git-workflow-plugin の `.plugin-workspace/commit/.commit-template.yml` が存在する場合、そのテンプレートのルールを優先して使用する（Glob: `**/git-workflow-plugin/.plugin-workspace/commit/.commit-template.yml`）。テンプレートがない場合は以下のデフォルト形式に従う。
 
 ```
 ♻️ [Refactoring]: {指摘内容}
