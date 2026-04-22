@@ -26,6 +26,8 @@ allowed-tools: Read, Write, Glob
 ```yaml
 title_format: "<emoji> [<tag>]: #<issue> <subject>"
 
+base_branch: "auto"  # "auto" = 親ブランチ（分岐元）を自動検出 / ブランチ名を直接指定も可能
+
 types:
   カテゴリ名:
     - emoji: "絵文字"
@@ -53,6 +55,10 @@ pr_watch:
 examples:
   - title: "PRタイトル例"
 ```
+
+### base_branch フィールド
+
+PRのマージ先ブランチを制御する。`"auto"` を指定すると、`pull-request` スキルが `git log --first-parent --decorate=short --simplify-by-decoration` で親ブランチ（分岐元）を自動検出する。特定のブランチ名（例: `"develop"`）を指定するとそのブランチを固定で使用する。未指定時は `"auto"` として扱う。
 
 ### pr_watch セクション
 

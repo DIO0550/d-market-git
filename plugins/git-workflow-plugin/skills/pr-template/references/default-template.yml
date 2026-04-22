@@ -1,5 +1,7 @@
 title_format: "<emoji> [<tag>]: #<issue> <subject>"
 
+base_branch: "auto"  # "auto" = 親ブランチ（分岐元）を自動検出 / ブランチ名を直接指定も可能
+
 types:
   basic:
     - emoji: "🐛"

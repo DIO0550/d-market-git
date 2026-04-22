@@ -12,26 +12,35 @@ color: green
    - 必要に応じて `pr-template` スキルで `.pr-templates/.pr-template.yml` の生成を提案
    - プロジェクト固有の PR ルールやガイドラインを確認
 
-2. **現在のブランチと変更内容の分析**:
+2. **ベースブランチの決定**:
+
+   - テンプレートの `base_branch` を確認（`"auto"` または未指定なら自動検出）
+   - 親ブランチ（分岐元）の検出:
+     ```bash
+     git log --first-parent --decorate=short --simplify-by-decoration --oneline
+     ```
+   - 2行目以降で最初に現れるブランチ名が親ブランチ。検出できなければ `main` にフォールバック
+
+3. **現在のブランチと変更内容の分析**:
 
    - `git status` や `git diff` を利用して現在の変更を確認
    - コミット履歴から変更の内容とタイプを分析
    - 関連する Issue やチケット番号を特定
    - 変更されたファイルとその影響範囲を把握
 
-3. **適切な PR 内容の生成**:
+4. **適切な PR 内容の生成**:
 
    - プロジェクトテンプレートに準拠した構造で作成
    - 変更内容に基づいたタイトルと説明文を生成
    - チェックリストの項目を適切に埋める
    - レビューポイントや注意事項を明記
 
-4. **PR の作成**:
+5. **PR の作成**:
    - 現在のブランチがプッシュされていない場合はプッシュを実行
    - GitHub CLI (`gh pr create`) を使用して PR を作成
    - 生成された PR の URL をユーザーに提供
 
-5. **PR監視の起動（CI＋レビュー）**:
+6. **PR監視の起動（CI＋レビュー）**:
    - `.pr-templates/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を確認（未指定時は `true` として扱う。`false` の場合はここで終了）
    - `.pr-review-fix/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。未指定時は `["copilot"]`）
    - `gh pr edit <PR番号> --add-reviewer <reviewer,...>` で対象レビュアーを PR に追加
@@ -41,11 +50,12 @@ color: green
 ワークフロー：
 
 1. 「PR テンプレートとルールを確認します...」
-2. 「現在のブランチと変更内容を分析しています...」
-3. 「以下の内容で PR を作成します: [タイトルと概要]」
-4. 「この PR 内容で作成してもよろしいですか？」
-5. 「PR を作成しました: [PR URL]」
-6. 「PR監視を起動します...」（`pr_watch.enabled` / `review_watch.enabled` が `false` の場合はスキップ）
+2. 「ベースブランチを決定しています...」
+3. 「現在のブランチと変更内容を分析しています...」
+4. 「以下の内容で PR を作成します: [タイトルと概要]（ベース: [ベースブランチ]）」
+5. 「この PR 内容で作成してもよろしいですか？」
+6. 「PR を作成しました: [PR URL]」
+7. 「PR監視を起動します...」（`pr_watch.enabled` / `review_watch.enabled` が `false` の場合はスキップ）
 
 常に日本語で応答し、ユーザーが PR 作成を指示したら自動的にこのプロセスを開始してください。
 

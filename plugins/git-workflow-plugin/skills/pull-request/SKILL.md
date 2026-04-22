@@ -17,12 +17,26 @@ PR本文を作成する際は、以下の順でテンプレートを参照する
 
 `.pr-templates/.pr-template.yml` がある場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
 
+## ベースブランチの決定
+
+PR作成時に `--base` フラグでマージ先ブランチを指定する。
+
+### 決定順序
+
+1. `.pr-templates/.pr-template.yml` の `base_branch` を確認
+2. `"auto"` または未指定の場合 → 親ブランチを自動検出する:
+   ```bash
+   git log --first-parent --decorate=short --simplify-by-decoration --oneline
+   ```
+   出力の2行目以降で最初に現れるブランチ名が親ブランチ（分岐元）。検出できない場合は `main` にフォールバック
+3. 明示的なブランチ名が指定されている場合はそのまま使用
+
 ## コマンド実行規約
 
 - **1回のBash呼び出し = 1コマンド**（`&&`, `||`, `;` による複合化禁止）
 - PRタイトル・本文は **heredoc** で渡す（ファイル書き出し `--body-file` は使わない）:
   ```bash
-  gh pr create --title "PRタイトル" --body "$(cat <<'EOF'
+  gh pr create --base <base_branch> --title "PRタイトル" --body "$(cat <<'EOF'
   ## 概要
   - 変更内容
 
