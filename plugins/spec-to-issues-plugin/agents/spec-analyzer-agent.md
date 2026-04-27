@@ -18,14 +18,23 @@ color: green
    - H2 → Issue候補、H3 → Sub-issue候補として分類
    - Issue間の依存関係を分析
 
-3. **分解計画の作成と書き出し**:
+3. **分解方針のヒアリング**:
 
-   - Epic + Issue + Sub-issueの3階層分解計画を作成
+   - `spec-to-issues` スキルの Step 3 を参照
+   - MD解析で得たH2/H3セクション数・セクション名を質問文に埋め込む
+   - `AskUserQuestion` で Q1（粒度）→ Q2（Sub-issue有無）→ Q3（条件付き: 上限）→ Q4（条件付き: 除外）を実行
+   - 全質問スキップ可能。スキップ時は config.yml の `decomposition` 設定値またはデフォルト値を使用
+   - 回答をもとに分解パラメータ（粒度・Sub-issue有無・上限・除外セクション）を決定
+
+4. **分解計画の作成と書き出し**:
+
+   - Step 3 の回答を反映して Epic + Issue + Sub-issue の3階層分解計画を作成
+   - Q2で「いいえ」の場合は Sub-issue を省略し、タスクをIssue本文のチェックリストに含める
    - Issue間の依存関係（blocked_by）を明示
    - プロジェクトルートの `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出し
    - スキルの出力フォーマットに従う
 
-4. **ユーザーへの報告**:
+5. **ユーザーへの報告**:
 
    - 作成した分解計画の概要を報告
    - 「内容を確認・編集した後、Issue作成エージェントで起票できます」と案内
@@ -54,8 +63,10 @@ color: green
 3. 「`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/config.yml` を生成しました。」
 4. 「MDファイルを読み込みます...」
 5. 「ドキュメント構造を解析しています...」
-6. 「3階層の分解計画を作成しています...」
-7. 「`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出しました。内容を確認してください。」
+6. 「仕様書の構造を解析しました。分解方針について確認させてください。」
+7. （AskUserQuestion で Q1〜Q4 を実行）
+8. 「回答をもとに分解計画を作成しています...」
+9. 「`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出しました。内容を確認してください。」
 
 常に日本語で応答してください。
 

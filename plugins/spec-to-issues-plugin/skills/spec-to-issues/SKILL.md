@@ -3,7 +3,7 @@ name: spec-to-issues
 description: 仕様書・設計書からGitHub Issueを自動生成する。Epic・Issue・Sub-issueの3階層に分解し、依存関係を明示して起票。ユーザーが明示的に呼び出した場合のみ使用。
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Bash(gh *), Read, Write, Glob, Grep
+allowed-tools: Bash(gh *), Read, Write, Glob, Grep, AskUserQuestion
 argument-hint: [仕様書MDファイルパス]
 ---
 
@@ -52,9 +52,11 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
    ↓
 2. ユーザー設定の確認（${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/config.yml）
    ↓
-3. 3階層 + 依存関係の分解計画を作成
+3. 分解方針のヒアリング（AskUserQuestion）
    ↓
-4. ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md に書き出し
+4. 3階層 + 依存関係の分解計画を作成
+   ↓
+5. ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md に書き出し
 ```
 
 ### Step 1: MDファイルの読み込みと解析
@@ -160,7 +162,84 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 
 設定スキーマの詳細は `references/config-schema.md` を参照。
 
-### Step 3: `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` への書き出し
+### Step 3: 分解方針のヒアリング
+
+MDファイルの解析後、分解計画を作成する前に `AskUserQuestion` を使ってユーザーの分解方針を確認する。
+**毎回実行する。全質問スキップ可能で、スキップ時は config.yml の `decomposition` 設定値またはデフォルト値が適用される。**
+
+#### 優先順位
+
+ヒアリング回答 > config.yml の `decomposition` > デフォルト値
+
+#### Q1: 分解の粒度
+
+MD解析で得たH2/H3セクション数を提示し、分解の粒度を選ばせる。
+
+```
+この仕様書には {n}個のH2セクション と {m}個のH3セクションがあります。
+分解の粒度を選んでください:
+
+1. 細かく分解（各H2をIssue、各H3をSub-issueに。作業単位: 半日〜1日）
+2. 標準（デフォルト。H2をIssue、関連H3をグループ化。作業単位: 1-3日）
+3. 粗く分解（関連H2をグループ化して大きなIssue単位に。作業単位: 3-5日）
+```
+
+スキップ時: **2. 標準** を適用
+
+#### Q2: Sub-issueの作成有無
+
+```
+Sub-issue（子Issue）を作成しますか？
+
+1. はい（各IssueにSub-issueを作成）
+2. いいえ（Issueのみ作成。タスクはIssue本文のチェックリストに含める）
+```
+
+スキップ時: **1. はい** を適用
+
+#### Q3: 最大Issue数の目安
+
+**Q1で「1. 細かく分解」を選択した場合のみ質問する。** それ以外の場合はスキップ。
+
+```
+Issue数の上限目安を設定しますか？
+
+1. 制限なし（仕様書の構造に従って自由に分解）
+2. 上限を指定 → 数値を入力
+```
+
+スキップ時: **1. 制限なし** を適用
+
+#### Q4: 除外セクション
+
+**H2セクションが4件以上の場合のみ質問する。** 3件以下の場合はスキップ。
+
+MD解析で得たH2セクション一覧を番号付きで提示し、除外するセクションを選ばせる。
+
+```
+Issue化から除外したいセクションはありますか？
+（除外するセクション番号をカンマ区切りで入力。例: 2,5）
+
+1. {H2セクション1のタイトル}
+2. {H2セクション2のタイトル}
+3. {H2セクション3のタイトル}
+...
+```
+
+スキップ時: 全セクションを対象
+
+#### 回答が分解計画に与える影響
+
+| 回答 | issues-plan.md への影響 |
+|:--|:--|
+| Q1=細かく | Issue数増。各H3が独立Sub-issueに |
+| Q1=標準 | 現行動作と同等 |
+| Q1=粗く | Issue数減。関連H2をグループ化して1つのIssueに |
+| Q2=いいえ | `#### Sub-issues` セクションを省略。タスクはbody内チェックリストとして記載 |
+| Q3=上限N | Issue数をN以下に収めるようセクションをグループ化 |
+| Q4=除外 | 指定されたH2セクションをplanから除外 |
+
+### Step 4: `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` への書き出し
 
 分解計画をプロジェクトルートの `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出す。
 

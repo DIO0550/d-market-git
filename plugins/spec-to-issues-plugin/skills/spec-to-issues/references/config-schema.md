@@ -62,6 +62,8 @@ templates:
   feature: ".github/issue-templates/feature.md"
 
 # Issue分解の設定
+# NOTE: AskUserQuestion による対話ヒアリングの回答は、ここの設定より優先されます。
+#       ヒアリングをスキップした場合は config.yml の値（またはデフォルト値）が使用されます。
 decomposition:
   max_days_per_issue: 3                       # 1 Issueあたりの最大作業日数（超えたら分割推奨）
   max_days_per_sub_issue: 1                   # 1 Sub-issueあたりの最大作業日数
