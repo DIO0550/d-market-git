@@ -1,7 +1,7 @@
 ---
 name: pull-request
 description: プルリクエスト作成スキル。PRテンプレートに基づいた説明文の作成、変更種類の分類、チェックリストの確認を支援。「PR作成」「プルリクエスト」「レビュー依頼」などのリクエスト時に使用。
-allowed-tools: Bash(git *), Bash(gh pr *), Read, Glob, Skill
+allowed-tools: Bash(git *), Bash(gh pr *), Bash(gh issue view *), Read, Glob, Skill
 ---
 
 # プルリクエスト作成
@@ -104,6 +104,29 @@ PR作成時に `--base` フラグでマージ先ブランチを指定する。
 
 - **閉じる**: `Closes #123` または `Fixes #123`
 - **参照のみ**: `Refs #123` または `Relates to #123`
+
+### キーワード選択の判断基準
+
+#### Close を使うケース
+
+- PRの変更がIssueで求められた機能・修正を**完全に実装**している
+- ブランチがそのIssue専用に作成されている（ブランチ名にIssue番号を含む等）
+- Bug fixのPRで、Issueが報告したバグを直接修正している
+
+#### Refs を使うケース
+
+- PRがIssueの**一部のみ**を対応している（Epic や大きなIssueの部分対応）
+- リファクタリング等で間接的に関連するが、直接的な解決ではない
+- Issueは別PRでCloseされる予定で、このPRは補助的な変更
+
+### 判断フロー
+
+1. ブランチ名・コミットメッセージから関連Issue番号を特定
+2. `gh issue view <番号> --json title,body,labels` でIssue内容を取得
+3. PRの diff とIssueの要求内容を照合し、判断基準に基づき Close or Refs を決定
+4. 判断が曖昧な場合はユーザーに確認する
+
+**フォールバック**: Issue情報を取得できない場合（権限不足・Issue削除済み等）は、ブランチ名とコミットメッセージから推測する。
 
 ### 必須事項
 

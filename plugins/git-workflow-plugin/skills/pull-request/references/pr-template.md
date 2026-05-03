@@ -131,14 +131,20 @@ OrderService.cancel()
 <!-- 関連するIssueがある場合は記載してください -->
 
 - GitHub の PR 画面「Development」セクションで、関連する Issue を必ず Link してください（Linked issues）。
-- 本文にも連携キーワードを記載してください:
-  - 閉じる場合: `Closes #<番号>` または `Fixes #<番号>`
-  - 参照のみ: `Refs #<番号>` または `Relates to #<番号>`
+- 本文にも連携キーワードを記載してください。**PRの内容に応じて Close / Refs を使い分ける**:
+  - **閉じる場合**: `Closes #<番号>` または `Fixes #<番号>`
+    - PRがIssueの要求を完全に実装・解決している
+    - ブランチがそのIssue専用に作成されている
+    - Bug fixでIssueが報告したバグを直接修正している
+  - **参照のみ**: `Refs #<番号>` または `Relates to #<番号>`
+    - PRがIssueの一部のみを対応している（Epic等の部分対応）
+    - 間接的に関連するが直接的な解決ではない
+    - Issueは別PRでCloseされる予定で、このPRは補助的な変更
 
 例:
 
-- Closes #123
-- Refs #456
+- Closes #123（このPRで機能を完全に実装）
+- Refs #456（Epic の一部対応）
 
 ## 🧪 テスト
 

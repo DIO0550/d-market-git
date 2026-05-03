@@ -87,7 +87,10 @@ body_sections:
   - key: "issues"
     title: "関連Issue"
     required: true
-    prompt: "Closes/Fixes/Refs などのキーワードで記載"
+    prompt: >
+      関連Issueを連携キーワード付きで記載する。
+      gh issue view でIssue内容を取得し、PRのdiffと照合して
+      Issueを完全に解決するなら Close/Fixes、部分対応や間接的関連なら Refs を選択する。
   - key: "tests"
     title: "テスト"
     required: true
@@ -106,6 +109,16 @@ rules:
     reference_keywords:
       - "Refs"
       - "Relates to"
+    decision_criteria:
+      use_close_when:
+        - "PRの変更がIssueの要求を完全に実装・解決している"
+        - "ブランチがそのIssue専用に作成されている（ブランチ名にIssue番号を含む）"
+        - "Bug fixでIssueが報告したバグを直接修正している"
+      use_refs_when:
+        - "PRがIssueの一部のみを対応している（Epic等の部分対応）"
+        - "リファクタリング等で間接的に関連するが直接的な解決ではない"
+        - "Issueは別PRでCloseされる予定で、このPRは補助的な変更"
+      verification: "gh issue view <番号> --json title,body,labels でIssue内容を取得し、PRのdiffと照合して判断する"
   title:
     include_type: true
     include_issue: true
