@@ -3,7 +3,7 @@ name: spec-to-issues
 description: 仕様書・設計書からGitHub Issueを自動生成する。Epic・Issue・Sub-issueの3階層に分解し、依存関係を明示して起票。ユーザーが明示的に呼び出した場合のみ使用。
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Bash(gh *), Read, Write, Glob, Grep
+allowed-tools: Bash(gh *), Read, Write, Glob, Grep, AskUserQuestion
 argument-hint: [仕様書MDファイルパス]
 ---
 
@@ -11,6 +11,7 @@ argument-hint: [仕様書MDファイルパス]
 
 仕様書・設計書のMDファイルからGitHub Issueを自動生成するスキル。
 Epic → Issue → Sub-issue の3階層構成で、Issue間の依存関係を明示する。
+さらに必要に応じて Sub-issue の下に **Task（関数単位の極小タスク）** を加えた最大4階層に分解できる。分解の深さ（3階層 / 4階層）は解析時に `AskUserQuestion` でユーザーが選択する。
 
 2つのエージェントで分担して実行する:
 - **spec-analyzer-agent**: 仕様書を解析し `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に分解計画を書き出す
@@ -52,9 +53,11 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
    ↓
 2. ユーザー設定の確認（${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/config.yml）
    ↓
-3. 3階層 + 依存関係の分解計画を作成
+3. 分解の深さを選択（AskUserQuestion: 3階層 / 4階層）
    ↓
-4. ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md に書き出し
+4. 分解計画を作成（依存関係つき。4階層なら Task も含める）
+   ↓
+5. ${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md に書き出し
 ```
 
 ### Step 1: MDファイルの読み込みと解析
@@ -75,8 +78,8 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 |:--|:--|
 | H1 | Epicのタイトルソース |
 | H2 | Issue候補（中粒度の作業単位） |
-| H3 | Sub-issue候補（細粒度のタスク） |
-| H4以下 | Sub-issueの本文に含める（独立Issueにしない） |
+| H3 | Sub-issue候補（細粒度・ファイル単位の作業） |
+| H4以下 | **3階層モード**: Sub-issueの本文に含める（独立Issueにしない）。**4階層モード**: Task候補（関数単位の極小タスク）として切り出す |
 
 **Issueタイプの判定ルール:**
 
@@ -93,6 +96,9 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 - UI関連のStorybookも同様に、Feature Issueのタスクとして含める
 - 実装に伴う小規模リファクタリング（関数分割、命名変更、既存コードの整理等）はFeature Issueのタスクとして含める。大規模な技術移行（フレームワーク移行、スキーマ変更等）のみMigrationとして分離する
 - コード内ドキュメント（JSDoc、コメント、型定義の説明等）はFeature Issueに含める。独立したドキュメント（README、API仕様書、ユーザーガイド等）のみDocsとして分離する
+
+**4階層モードを選択した場合の例外:**
+上記のうち「関数1つの実装」「関数分割」「小さなヘルパー・ユーティリティ追加」「単一バリデーション関数」など、関数単位で独立して着手できる作業は、Feature/Sub-issueのチェックリストに埋め込まず **Task（`type:task`）** として切り出す。対応する単体テストはその実装 Task のタスク欄に含める。3階層モードでは従来どおりチェックリストに吸収する。
 
 **エリア判定キーワード:**
 
@@ -121,6 +127,7 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 **分解の粒度ルール:**
 - Issue（中粒度）: 1-3日で完了可能な単位
 - Sub-issue（細粒度）: 半日〜1日で完了可能な単位
+- Task（極小粒度・**4階層モードのみ**）: 数時間（〜4時間）で完了可能な関数単位。1 Sub-issueあたり Task 2-6件が目安。これ以上に細かくはしない
 - 1 Issueあたり Sub-issue 2-5件が目安
 - 3日以上かかりそうなセクションは複数Issueに分割する
 
@@ -159,6 +166,22 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 回答があった項目のみ `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/config.yml` に書き出す。全スキップの場合は空のymlを生成する。
 
 設定スキーマの詳細は `references/config-schema.md` を参照。
+
+### Step 2.5: 分解の深さの選択
+
+分解計画を作る前に、`AskUserQuestion` でユーザーに分解の深さを確認する。
+
+**質問**: 「どの粒度まで分解しますか？」
+
+| 選択肢 | 内容 |
+|:--|:--|
+| **標準（3階層）** | Epic → Issue → Sub-issue。関数単位の作業は各Issue/Sub-issueのチェックリストに含める（従来の挙動） |
+| **詳細（4階層）** | 上記に加え、Sub-issue の下に **Task（関数単位の極小タスク）** を起票する |
+
+- **標準を選択**: 以降 Task は生成しない（従来どおりの出力。後方互換）
+- **詳細を選択**: 各 Sub-issue について、関数単位で独立して着手できる作業を Task として洗い出す（粒度ルール参照）。Task が自然に切り出せない Sub-issue は Task なしでよい（混在可）
+
+選択結果は `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` のフォーマット（Task セクションの有無）に反映する。
 
 ### Step 3: `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` への書き出し
 
@@ -201,6 +224,21 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
        ## タスク
        - [ ] タスク1
 
+   ##### Tasks
+   （4階層モードのみ。なければセクションごと省略）
+
+   1. {Taskタイトル}
+      - labels: type:task, {area}
+      - body: |
+          ## 概要
+          {関数単位で実装する内容}
+
+   2. {Taskタイトル}
+      - labels: type:task, {area}
+      - body: |
+          ## 概要
+          {関数単位で実装する内容}
+
 2. {Sub-issueタイトル}
    - labels: {label1}, {label2}
    - body: |
@@ -239,6 +277,7 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 - `blocked_by`: 依存先Issueの連番リスト（`[]` は依存なし）
 - `body`: `|` の後にインデント付きでIssue本文（Markdown）
 - Sub-issuesは `#### Sub-issues` セクション内に番号付きリストで定義
+- Tasksは各Sub-issue配下の `##### Tasks` セクション内に番号付きリストで定義（4階層モードのみ。3階層モードでは出力しない）
 - 依存関係グラフは `#連番 → #連番` 形式
 
 ---
@@ -264,9 +303,13 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
    ↓
 8. Issue ← Sub-issue 親子リンク設定
    ↓
-9. Epic本文をIssue番号で更新
+9. Task作成（4階層モードのみ、各Sub-issueごと）
    ↓
-10. 完了サマリー報告
+10. Sub-issue ← Task 親子リンク設定（4階層モードのみ）
+   ↓
+11. Epic本文をIssue番号で更新
+   ↓
+12. 完了サマリー報告
 ```
 
 ### Step 1: `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` の読み込みとパース
@@ -276,6 +319,7 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 - **Epic**: タイトル、ラベル
 - **Issues**: 各Issueのタイトル、ラベル、依存関係（blocked_by）、本文
 - **Sub-issues**: 各Issue配下のSub-issueタイトル、ラベル、本文
+- **Tasks**: 各Sub-issue配下のTaskタイトル、ラベル、本文（4階層モードのみ。存在しなければスキップ）
 - **依存関係グラフ**
 
 #### パースルール
@@ -285,6 +329,7 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 - `- blocked_by: [{...}]` は数値配列としてパース（`[]` は依存なし）
 - `- body: |` の次行以降、インデントされた行がIssue本文
 - `#### Sub-issues` 以降の番号付きリストがSub-issue定義
+- `##### Tasks` 以降の番号付きリストがTask定義（各Sub-issue配下。セクションが無ければそのSub-issueにTaskなし）
 
 ### Step 2: ユーザー確認
 
@@ -400,7 +445,35 @@ gh api graphql -f query='
 ' -f parentId="{issue_node_id}" -f childId="{sub_issue_node_id}"
 ```
 
-### Step 9: Epic本文更新
+### Step 9: Task作成（4階層モードのみ）
+
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に `##### Tasks` セクションがある Sub-issue について、配下の Task を起票する。3階層モード（Task定義なし）ではこの Step と Step 10 をスキップする。
+
+タイトルは親 Sub-issue のプレフィックスを引き継ぐ。ラベルは `type:task` と継承エリアラベルを付与する。
+
+```bash
+TASK_URL=$(gh issue create \
+  --title "{sub_issue_prefix} - {task_title}" \
+  --body "{Task本文}" \
+  --label "type:task" --label "{area}")
+
+TASK_NUM=$(echo "$TASK_URL" | grep -oE '[0-9]+$')
+```
+
+### Step 10: Sub-issue ← Task 親子リンク設定（4階層モードのみ）
+
+```bash
+gh api graphql -f query='
+  mutation($parentId: ID!, $childId: ID!) {
+    addSubIssue(input: {issueId: $parentId, subIssueId: $childId}) {
+      issue { id title }
+      subIssue { id title }
+    }
+  }
+' -f parentId="{sub_issue_node_id}" -f childId="{task_node_id}"
+```
+
+### Step 11: Epic本文更新
 
 全Issue作成後、Epicの「Issue一覧」を実番号で更新。
 
@@ -410,7 +483,7 @@ gh api graphql -f query='
 - [ ] #{issue_2} {タイトル} (Blocked by #{issue_1})
 ```
 
-### Step 10: 完了サマリー報告
+### Step 12: 完了サマリー報告
 
 ```
 ## Issue作成サマリー
@@ -418,13 +491,14 @@ gh api graphql -f query='
 ### Epic
 - #{epic_number} [Epic] {タイトル}
 
-### Issue（{n}件）+ Sub-issue（{m}件）
+### Issue（{n}件）+ Sub-issue（{m}件）+ Task（{t}件）
 - [x] #{issue_1} {タイトル} (Sub-issues: #{s1}, #{s2})
 - [x] #{issue_2} {タイトル} (Blocked by #{issue_1}) (Sub-issues: #{s3})
 
 ### リンク状態
 - 全 {n} 件のIssueがEpicにリンク済み
 - 全 {m} 件のSub-issueが各親Issueにリンク済み
+- 全 {t} 件のTaskが各親Sub-issueにリンク済み（4階層モードのみ）
 ```
 
 ---
@@ -445,6 +519,7 @@ bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
 | 種別 | `type:chore` | 雑務/設定 |
 | 種別 | `type:test` | テスト関連 |
 | 種別 | `type:docs` | ドキュメント関連 |
+| 種別 | `type:task` | 関数単位の極小タスク（4階層モード） |
 | 領域 | `area:frontend` | フロントエンド |
 | 領域 | `area:server` | バックエンド/サーバ |
 | 領域 | `area:shared` | 共有/横断 |
@@ -473,6 +548,8 @@ bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
 | GraphQL `addSubIssue`失敗 | 報告するが続行（手動リンクを案内） |
 | Issue数が20件超 | 作成前にユーザーに確認 |
 | Sub-issue数が多すぎる（1 Issueあたり8件超） | 粒度の再検討を提案 |
+| Task数が多すぎる（1 Sub-issueあたり6件超） | 4階層分解の粒度の再検討を提案 |
+| 4階層モードで総Issue数が過大（合計50件超） | 作成前に件数を提示してユーザーに確認 |
 
 ## 禁止事項
 

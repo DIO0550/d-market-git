@@ -11,6 +11,7 @@ title_formats:
   test: "[Test] {summary}"
   docs: "[Docs] {summary}"
   chore: "[Chore] {summary}"
+  task: "[Task][{area}] {summary}"
 
 # Epic設定
 epic:
@@ -213,6 +214,26 @@ types:
         required: false
         prompt: "この変更が影響するコンポーネントや機能を記載"
 
+  - name: task
+    label: "type:task"
+    description: "関数単位の極小タスク（Sub-issueの下に紐づく最小実装単位。1関数・1メソッド・1ヘルパー程度）"
+    detection_keywords:
+      - "関数"
+      - "メソッド"
+      - "ヘルパー"
+      - "ユーティリティ"
+      - "バリデーション"
+    body_sections:
+      - key: overview
+        title: "概要"
+        required: true
+        prompt: "この関数・極小単位で実装する内容を1〜2文で記載"
+      - key: tasks
+        title: "タスク"
+        required: false
+        format: "checklist"
+        prompt: "必要なら細目をチェックリスト形式で記載（関数1つなら省略可）"
+
 # ラベル体系
 labels:
   # 種別ラベル（typesのlabelフィールドで自動定義）
@@ -238,6 +259,9 @@ labels:
     - name: "type:chore"
       description: "雑務/設定"
       color: "EDEDED"
+    - name: "type:task"
+      description: "関数単位の極小タスク"
+      color: "C5DEF5"
 
   # エリアラベル
   area:
@@ -327,6 +351,9 @@ rules:
     max_days_per_sub_issue: 1
     min_sub_issues_per_issue: 1
     max_sub_issues_per_issue: 8
+    # Task（関数単位）は4階層分解を選択した場合のみ生成する極小単位
+    max_hours_per_task: 4
+    max_tasks_per_sub_issue: 6
 
   # 依存関係
   dependencies:
