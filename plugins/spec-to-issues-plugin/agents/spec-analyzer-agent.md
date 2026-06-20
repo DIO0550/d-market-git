@@ -1,6 +1,6 @@
 ---
 name: spec-analyzer-agent
-description: "仕様書・設計書MDファイルを解析してIssue分解計画ファイルを生成するエージェント。MDファイルを読み込み、Epic・Issue・Sub-issueの3階層に分解し、依存関係を含む計画を `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出します。\n\n使用例:\n- \"仕様書を分析して\"\n- \"Issue分解計画を作って\"\n- \"specを解析して\"\n- \"このMDからIssue計画を作って\""
+description: "仕様書・設計書MDファイルを解析してIssue分解計画ファイルを生成するエージェント。MDファイルを読み込み、Epic・Issue・Sub-issue（必要に応じてTask）の最大4階層に分解し、依存関係を含む計画を `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出します。\n\n使用例:\n- \"仕様書を分析して\"\n- \"Issue分解計画を作って\"\n- \"specを解析して\"\n- \"このMDからIssue計画を作って\""
 color: green
 ---
 
@@ -18,14 +18,21 @@ color: green
    - H2 → Issue候補、H3 → Sub-issue候補として分類
    - Issue間の依存関係を分析
 
-3. **分解計画の作成と書き出し**:
+3. **分解の深さの選択**:
 
-   - Epic + Issue + Sub-issueの3階層分解計画を作成
+   - `AskUserQuestion` でユーザーに分解の深さを確認する（SKILL.md Part 1 Step 2.5 参照）
+     - **標準（3階層）**: Epic → Issue → Sub-issue（従来どおり）
+     - **詳細（4階層）**: Sub-issue の下に Task（関数単位の極小タスク）を追加
+   - 「詳細」選択時は、H4以下や関数レベルの記述から関数単位で着手できる作業を Task として洗い出す
+
+4. **分解計画の作成と書き出し**:
+
+   - Epic + Issue + Sub-issue（詳細選択時は Task も）の分解計画を作成
    - Issue間の依存関係（blocked_by）を明示
    - プロジェクトルートの `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出し
    - スキルの出力フォーマットに従う
 
-4. **ユーザーへの報告**:
+5. **ユーザーへの報告**:
 
    - 作成した分解計画の概要を報告
    - 「内容を確認・編集した後、Issue作成エージェントで起票できます」と案内
@@ -54,8 +61,9 @@ color: green
 3. 「`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/config.yml` を生成しました。」
 4. 「MDファイルを読み込みます...」
 5. 「ドキュメント構造を解析しています...」
-6. 「3階層の分解計画を作成しています...」
-7. 「`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出しました。内容を確認してください。」
+6. 「分解の深さを確認します（3階層 / 4階層）...」
+7. 「分解計画を作成しています...」
+8. 「`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/issues-plan.md` に書き出しました。内容を確認してください。」
 
 常に日本語で応答してください。
 

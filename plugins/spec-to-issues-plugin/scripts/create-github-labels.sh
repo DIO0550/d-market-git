@@ -100,6 +100,7 @@ type:migration,D97706,マイグレーション/移行
 type:chore,6B7280,雑務/設定
 type:test,059669,テスト関連
 type:docs,8B5CF6,ドキュメント関連
+type:task,C5DEF5,関数単位の極小タスク
 
 # 領域
 area:frontend,EC4899,フロントエンド領域

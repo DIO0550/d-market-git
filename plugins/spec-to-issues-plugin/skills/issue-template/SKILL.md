@@ -42,7 +42,7 @@ argument-hint: [プロジェクトパス（省略時はカレント）]
 
 以下を確認する（全項目スキップ可能。スキップ時はデフォルト値を使用）:
 
-1. **Issueタイプ**: デフォルト6種（Feature, Bug, Migration, Test, Docs, Chore）で十分か、追加・削除したいタイプがあるか
+1. **Issueタイプ**: デフォルト7種（Feature, Bug, Migration, Test, Docs, Chore, Task）で十分か、追加・削除したいタイプがあるか（`task` は4階層分解で使う関数単位の極小タスク用）
 2. **タイトルフォーマット**: デフォルトの `[Type] subject` 形式でよいか
 3. **ラベル体系**: 種別・エリア・優先度・サイズのラベル名をカスタマイズしたいか
 4. **本文セクション**: タイプ別の必須/任意セクションを変更したいか
@@ -124,5 +124,6 @@ rules:
 - 独自タイプの追加も可能（`name`, `label`, `description`, `body_sections` を定義）
 - ラベルのキーワードはプロジェクトの技術スタックに合わせて調整
 - `body_sections` の `required: true/false` でIssue作成時の必須チェックを制御
+- `task` タイプは `spec-to-issues` の4階層分解（Epic→Issue→Sub-issue→Task）で使う関数単位の極小タスク用。4階層分解を使わない場合は無視してよい
 
 デフォルトテンプレートは `references/default-template.yml` を参照。
