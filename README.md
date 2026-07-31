@@ -36,13 +36,14 @@ PR の CI エラー修正・レビュー指摘修正を自動化するプラグ�
 | `/pr-review-fix-template` | レビュー修正時の設定ファイル生成 |
 | `/similarity` | コードの類似度検出（リファクタリング候補の特定） |
 
-### 3. spec-to-issues-plugin
+### 3. issues-workflow-plugin
 
-仕様書（Markdown）から GitHub Issue を自動生成するプラグインです。
+GitHub Issue ワークフロープラグインです。仕様書からの Issue 自動生成と、実装プランの Issue 直書きを提供します。
 
 | スキル | 説明 |
 |---|---|
 | `/spec-to-issues` | 仕様書を Epic > Issue > Sub-issue の 3 階層に分解して Issue 作成 |
+| `/plan-issue` | 実装プランを MD ファイルの代わりに Issue として直接書き起こす（意思決定・実装方針の記録） |
 | `/issue-template` | Issue テンプレート（YAML）の生成 |
 
 **エージェント:**
@@ -50,7 +51,7 @@ PR の CI エラー修正・レビュー指摘修正を自動化するプラグ�
 - `issues-creator-agent` - 計画に基づき GitHub Issue を作成（親子リンク付き）
 
 **ラベル体系:**
-- タイプ: `type:epic`, `type:feature`, `type:migration`, `type:test`, `type:docs`, `type:chore`
+- タイプ: `type:epic`, `type:feature`, `type:migration`, `type:test`, `type:docs`, `type:chore`, `type:task`, `type:plan`
 - 領域: `area:frontend`, `area:server`, `area:shared`
 - 優先度: `priority:P1`, `priority:P2`, `priority:P3`
 - サイズ: `size:S`, `size:M`, `size:L`
@@ -98,7 +99,7 @@ PR の CI エラー修正・レビュー指摘修正を自動化するプラグ�
     },
     {
       "type": "project",
-      "source": "/path/to/d-market-git/plugins/spec-to-issues-plugin"
+      "source": "/path/to/d-market-git/plugins/issues-workflow-plugin"
     }
   ]
 }
@@ -127,10 +128,10 @@ d-market-git/
 │   │   └── skills/               # commit, pull-request, pr-review 等
 │   ├── workflow-automation-plugin/ # ワークフロー自動化
 │   │   └── skills/               # pr-ci-fix, pr-fix-review 等
-│   └── spec-to-issues-plugin/    # 仕様書 → Issue 生成
+│   └── issues-workflow-plugin/    # GitHub Issue ワークフロー
 │       ├── agents/               # 解析・作成エージェント
 │       ├── scripts/              # ラベル作成スクリプト
-│       └── skills/               # spec-to-issues, issue-template
+│       └── skills/               # spec-to-issues, plan-issue, issue-template
 └── LICENSE                       # MIT
 ```
 
