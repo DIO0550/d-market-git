@@ -508,7 +508,7 @@ gh api graphql -f query='
 リポジトリにラベルがない場合、`scripts/create-github-labels.sh`で一括作成:
 
 ```bash
-bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
+bash plugins/issues-workflow-plugin/scripts/create-github-labels.sh
 ```
 
 | カテゴリ | ラベル | 説明 |

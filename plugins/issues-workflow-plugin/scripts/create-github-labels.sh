@@ -2,10 +2,10 @@
 set -eu
 
 # create-github-labels.sh
-# spec-to-issues-plugin で使用する GitHub ラベルを一括作成/更新します。
+# issues-workflow-plugin で使用する GitHub ラベルを一括作成/更新します。
 # 依存: gh (GitHub CLI)
 # 使い方:
-#   bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
+#   bash plugins/issues-workflow-plugin/scripts/create-github-labels.sh
 # オプション:
 #   DRY_RUN=1      変更を加えずに実行内容のみ表示
 #   FORCE_UPDATE=1 既存ラベルに対して色/説明を上書き更新
@@ -25,7 +25,7 @@ require_cmd() {
 usage() {
   cat <<EOF
 Usage:
-  bash plugins/spec-to-issues-plugin/scripts/create-github-labels.sh
+  bash plugins/issues-workflow-plugin/scripts/create-github-labels.sh
 
 Env options:
   REPO=owner/repo   対象リポジトリ（未指定時は gh から推定）
