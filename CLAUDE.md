@@ -8,7 +8,7 @@ d-market-git は Claude Code プラグインのマーケットプレイスリポ
 
 - `plugins/git-workflow-plugin/` - Git 操作支援（コミット・PR 作成・レビュー・ブランチ保護）
 - `plugins/workflow-automation-plugin/` - ワークフロー自動化（CI エラー修正・レビュー指摘修正・類似コード検出）
-- `plugins/spec-to-issues-plugin/` - 仕様書から GitHub Issue 自動生成（Epic→Issue→Sub-issue→Task の最大 4 階層。分解の深さは実行時に選択）
+- `plugins/spec-to-issues-plugin/` - 仕様書から GitHub Issue 自動生成（Epic→Issue→Sub-issue→Task の最大 4 階層。分解の深さは実行時に選択）。実装プランの Issue 登録（plan-to-issue）も提供
 - `.claude-plugin/marketplace.json` - プラグインレジストリ
 
 各プラグインは `plugin.json` を持ち、skills・agents・hooks で構成される。
@@ -58,3 +58,4 @@ main, master, production, release, develop, staging ブランチへの直接編�
   - `.plugin-workspace/issues/issue-template.yml`
   - `.plugin-workspace/issues/config.yml`
   - `.plugin-workspace/issues/issues-plan.md`
+  - `.plugin-workspace/issues/plan-issue-template.md`
