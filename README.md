@@ -44,6 +44,7 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 |---|---|
 | `/spec-to-issues` | 仕様書を Epic > Issue > Sub-issue の 3 階層に分解して Issue 作成 |
 | `/plan-issue` | 実装プランを MD ファイルの代わりに Issue として直接書き起こす（意思決定・実装方針の記録） |
+| `/plan-issue-report` | 実装完了後にプラン Issue へ振り返りコメント（想定と違った点・プランからの変更等）を投稿してクローズ |
 | `/issue-template` | Issue テンプレート（YAML）の生成 |
 
 **エージェント:**

@@ -59,3 +59,4 @@ main, master, production, release, develop, staging ブランチへの直接編�
   - `.plugin-workspace/issues/config.yml`
   - `.plugin-workspace/issues/issues-plan.md`
   - `.plugin-workspace/issues/plan-issue-template.md`
+  - `.plugin-workspace/issues/plan-report-template.md`
