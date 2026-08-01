@@ -38,7 +38,7 @@ Issue本文のフォーマットは以下の優先順位で解決する:
 1. **`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/plan-issue-template.md`**（プロジェクトカスタム）が存在する場合 → その構成を使用
 2. **`references/plan-issue-template.md`**（ビルトインデフォルト）→ カスタムが存在しない場合のフォールバック
 
-カスタムテンプレートを作りたい場合は、ビルトインをコピーして `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/plan-issue-template.md` に配置し、セクションを増減する。
+カスタムテンプレートは `plan-template` スキルで生成できる（ビルトインをベースに対話でカスタマイズ）。
 
 ## ワークフロー
 

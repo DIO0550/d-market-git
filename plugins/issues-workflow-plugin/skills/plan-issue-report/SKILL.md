@@ -34,6 +34,8 @@ argument-hint: [プランIssue番号（省略時は自動検出）]
 1. **`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/issues/plan-report-template.md`**（プロジェクトカスタム）が存在する場合 → その構成を使用
 2. **`references/plan-report-template.md`**（ビルトインデフォルト）→ カスタムが存在しない場合のフォールバック
 
+カスタムテンプレートは `plan-template` スキルで生成できる（ビルトインをベースに対話でカスタマイズ）。
+
 ## ワークフロー
 
 ```
