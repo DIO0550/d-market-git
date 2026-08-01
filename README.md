@@ -46,6 +46,7 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 | `/plan-issue` | 実装プランを MD ファイルの代わりに Issue として直接書き起こす（意思決定・実装方針の記録） |
 | `/plan-issue-report` | 実装完了後にプラン Issue へ振り返りコメント（想定と違った点・プランからの変更等）を投稿してクローズ |
 | `/issue-template` | Issue テンプレート（YAML）の生成 |
+| `/plan-template` | プラン Issue・振り返りコメントのカスタムテンプレート生成 |
 
 **エージェント:**
 - `spec-analyzer-agent` - 仕様書を解析し、Issue 分解計画を作成
@@ -114,6 +115,7 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 /commit-template    # .plugin-workspace/commit/.commit-template.yml を生成
 /pr-template        # .plugin-workspace/pull-request/.pr-template.yml を生成
 /issue-template     # .plugin-workspace/issues/issue-template.yml を生成
+/plan-template      # .plugin-workspace/issues/plan-issue-template.md, plan-report-template.md を生成
 ```
 
 ## ディレクトリ構成
