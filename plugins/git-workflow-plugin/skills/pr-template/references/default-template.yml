@@ -58,14 +58,13 @@ body_sections:
     prompt: "削除した機能やファイル"
   - key: "decisions"
     title: "意思決定と経緯"
-    required: false
+    required: "by_decision_record"  # 出力可否は decision_record.mode が決める（off なら省略）
     prompt: >
       なぜその方針を選んだかを記載する。
       git log <base_branch>..HEAD --format=%B で各コミット本文の意思決定を集め、
       PR全体としての方針判断に束ね直す（コミット本文の丸写しはしない）。
       出力する内容は decision_record.mode に従う。
       代替案は必ず却下理由とセットで書き、トレードオフは何を犠牲にしたかを書く。
-      decision_record.mode が "off" の場合はセクション自体を省略する。
   - key: "diagrams"
     title: "システム図"
     required: false
@@ -126,14 +125,15 @@ decision_record:
   # 各コミット本文に記録された意思決定の収集元
   source: "git log <base_branch>..HEAD --format=%B"
 
-  # mode ごとに出力するセクション（sections の key を並べる）
+  # mode ごとに出力する小見出し（subsections の key を並べる）
   modes:
     "off": []   # YAML 1.1 では off が真偽値になるためクォートする
     "minimal": ["why"]
     "standard": ["background", "why", "impact"]
     "detailed": ["background", "why", "alternatives", "impact", "deferred", "refs"]
 
-  sections:
+  # 小見出しの定義（body_sections とは別レイヤー。decisions セクションの内部構造）
+  subsections:
     - key: "background"
       title: "背景"
       prompt: "この変更が必要になった経緯・課題・制約"

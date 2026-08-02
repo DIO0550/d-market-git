@@ -50,9 +50,9 @@ decision_record:
   escalate_when: [mode を1段階上げる変更]
   source: "git log <base_branch>..HEAD --format=%B"
   modes:
-    "standard": [出力するセクションのkey]
-  sections:
-    - key: "セクションキー"
+    "standard": [出力する小見出しのkey]
+  subsections:
+    - key: "小見出しキー"
       title: "見出し"
       prompt: "何を書くかの指示"
 
@@ -81,17 +81,13 @@ PRのマージ先ブランチを制御する。`"auto"` を指定すると、`pu
 
 PR 本文の「意思決定と経緯」をどこまで書くかを制御する。設計メモを別ファイルに残す代わりに、判断の経緯をコミット本文と PR 本文へ蓄積する運用のための設定。
 
-| mode | 出力する内容 |
-|:-|:-|
-| `off` | セクションを出力しない |
-| `minimal` | なぜこの方針かを 2-3 行 |
-| `standard` | 背景 / なぜこの方針か / 影響とトレードオフ |
-| `detailed` | standard + 検討した代替案 / 今回見送ったこと / 参考 |
+`mode`（`off` / `minimal` / `standard` / `detailed`）と、各 mode が出力する小見出しの対応は `references/default-template.yml` の `decision_record.modes` が正典。
 
 - `decision_record` 自体が無い場合、`pull-request` スキルは `standard` として扱う
 - `source` は各コミット本文に記録された意思決定の収集元コマンド。`commit` スキルの `decision_record` と対になる
 - `modes` のキーは必ずクォートする（YAML 1.1 では `off` が真偽値として解釈されるため）
-- `mode` を `off` にした場合は `body_sections` の `decisions` も併せて削除してよい
+- `decisions` セクションの出力可否は `decision_record.mode` が決める。`body_sections` の `decisions` には `required: "by_decision_record"` を指定し、`true`/`false` は書かない（2箇所で同じことを制御すると優先順位が不定になる）
+- `subsections` は `decisions` セクションの内部小見出し。PR本文のセクション群である `body_sections` とは別レイヤー
 
 ### pr_watch セクション
 
