@@ -54,6 +54,7 @@ main, master, production, release, develop, staging ブランチへの直接編�
   - `.plugin-workspace/pull-request/.pr-template.yml`
 - workflow-automation-plugin:
   - `.plugin-workspace/pull-request/.pr-review-fix.yml`
+  - `.plugin-workspace/pull-request/review-fix-report-template.md`
 - issues-workflow-plugin:
   - `.plugin-workspace/issues/issue-template.yml`
   - `.plugin-workspace/issues/config.yml`
