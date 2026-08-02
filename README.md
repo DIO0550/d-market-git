@@ -23,6 +23,7 @@ Git 操作支援プラグイン。コミット・PR 作成・ブランチ保護�
 **フック:**
 - `branch-protection` - 保護ブランチ（main, master, production 等）への直接編集を禁止
 - `no-git-add-all` - `git add -A / --all / .` による一括ステージングを禁止
+- `no-commit-md-heading` - コミット本文の行頭 `#` 見出しを禁止（git のコメント除去による本文の欠落を防ぐ）
 
 ### 2. workflow-automation-plugin
 
@@ -143,14 +144,16 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 
 ### テンプレートの初期化（任意）
 
-プロジェクトごとにテンプレートをカスタマイズできます。各テンプレートは `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下に生成されます。
+プロジェクトごとにテンプレートをカスタマイズできます。
 
 ```
-/commit-template    # .plugin-workspace/commit/.commit-template.yml を生成
-/pr-template        # .plugin-workspace/pull-request/.pr-template.yml を生成
+/commit-template    # .claude/.commit-template.yml を生成
+/pr-template        # .claude/.pr-template.yml を生成
 /issue-template     # .plugin-workspace/issues/issue-template.yml を生成
 /plan-template      # .plugin-workspace/issues/plan-issue-template.md, plan-report-template.md を生成
 ```
+
+`/commit-template` と `/pr-template` はプロジェクト直下の `.claude/` に生成します（`decision_record.mode` のような運用方針はプロジェクトごとに変わるため）。スキルは **プロジェクト直下 → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` → 既定値** の順で探すので、複数プロジェクトで共有したい設定は後者に置けます。issues 系のテンプレートは `.plugin-workspace/` のみを参照します。
 
 ## ディレクトリ構成
 
