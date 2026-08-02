@@ -56,6 +56,16 @@ body_sections:
     title: "削除した内容"
     required: false
     prompt: "削除した機能やファイル"
+  - key: "decisions"
+    title: "意思決定と経緯"
+    required: false
+    prompt: >
+      なぜその方針を選んだかを記載する。
+      git log <base_branch>..HEAD --format=%B で各コミット本文の意思決定を集め、
+      PR全体としての方針判断に束ね直す（コミット本文の丸写しはしない）。
+      出力する内容は decision_record.mode に従う。
+      代替案は必ず却下理由とセットで書き、トレードオフは何を犠牲にしたかを書く。
+      decision_record.mode が "off" の場合はセクション自体を省略する。
   - key: "diagrams"
     title: "システム図"
     required: false
@@ -97,6 +107,52 @@ body_sections:
     required: false
     prompt: "レビュアーに重点的に見てほしい点"
 
+decision_record:
+  # PR本文の「意思決定と経緯」セクションをどこまで書くか
+  #   off      : セクションを出力しない
+  #   minimal  : 「なぜこの方針か」を2-3行
+  #   standard : 背景 / なぜこの方針か / 影響とトレードオフ（デフォルト）
+  #   detailed : standard + 検討した代替案 + 今回見送ったこと + 参考
+  mode: "standard"
+
+  # 該当するPRは mode を1段階上げる（standard -> detailed）
+  escalate_when:
+    - "アーキテクチャ・設計方針の変更"
+    - "破壊的変更"
+    - "外部に公開するAPI・仕様の変更"
+    - "パフォーマンス・セキュリティ上のトレードオフを伴う変更"
+    - "依存関係の追加・削除"
+
+  # 各コミット本文に記録された意思決定の収集元
+  source: "git log <base_branch>..HEAD --format=%B"
+
+  # mode ごとに出力するセクション（sections の key を並べる）
+  modes:
+    "off": []   # YAML 1.1 では off が真偽値になるためクォートする
+    "minimal": ["why"]
+    "standard": ["background", "why", "impact"]
+    "detailed": ["background", "why", "alternatives", "impact", "deferred", "refs"]
+
+  sections:
+    - key: "background"
+      title: "背景"
+      prompt: "この変更が必要になった経緯・課題・制約"
+    - key: "why"
+      title: "なぜこの方針か"
+      prompt: "PR全体として採用した方針とその理由"
+    - key: "alternatives"
+      title: "検討した代替案"
+      prompt: "採用しなかった案と却下理由。再検討しうる条件があれば併記する"
+    - key: "impact"
+      title: "影響とトレードオフ"
+      prompt: "既存挙動・互換性・運用への影響、受け入れたトレードオフ"
+    - key: "deferred"
+      title: "今回見送ったこと"
+      prompt: "スコープ外にした項目と理由。後続Issueがあれば番号を併記する"
+    - key: "refs"
+      title: "参考"
+      prompt: "Issue・設計ドキュメント・外部資料へのリンク"
+
 rules:
   issue_link:
     required: true
@@ -125,6 +181,7 @@ rules:
 
 checklist:
   - "セルフレビューを実施した"
+  - "意思決定と経緯を記載した（decision_record.mode が off 以外の場合）"
   - "必要なテストを実施した"
   - "必要なドキュメントを更新した（必要時）"
   - "関連IssueをPRにリンクした"
