@@ -34,6 +34,10 @@ title_format: "<emoji> [<tag>]: #<issue> <subject>"
 
 base_branch: "auto"  # "auto" = 親ブランチ（分岐元）を自動検出 / ブランチ名を直接指定も可能
 
+stack:
+  body_section: false  # 本文にスタック一覧を書くか
+  cli: "none"          # none | gh-stack
+
 types:
   カテゴリ名:
     - emoji: "絵文字"
@@ -76,6 +80,14 @@ examples:
 ### base_branch フィールド
 
 PRのマージ先ブランチを制御する。`"auto"` を指定すると、`pull-request` スキルが `git log --first-parent --decorate=short --simplify-by-decoration` で親ブランチ（分岐元）を自動検出する。特定のブランチ名（例: `"develop"`）を指定するとそのブランチを固定で使用する。未指定時は `"auto"` として扱う。
+
+### stack セクション
+
+スタック（stacked PR）の扱いを制御する。`base_branch: "auto"` が分岐元ブランチを `--base` に渡すため、既定の設定のままスタックとして成立する。GitHub が chain を検出してスタック化を提案するので、追加の操作は要らない。
+
+- `body_section` は既定 `false`。GitHub がスタックをネイティブ表示するため、本文に手書きすると二重管理になり更新漏れで食い違う。ネイティブ表示が使えない事情がある場合のみ `true` にする
+- `cli: "gh-stack"` にすると `gh stack link` で明示登録する。`gh extension install github/github/gh-stack` が前提になるため、既定は `none`
+- スタックは同一リポジトリ内の PR に限られる（cross-fork 不可）
 
 ### decision_record セクション
 

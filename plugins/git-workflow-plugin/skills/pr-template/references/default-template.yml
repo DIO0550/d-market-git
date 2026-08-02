@@ -106,6 +106,16 @@ body_sections:
     required: false
     prompt: "レビュアーに重点的に見てほしい点"
 
+stack:
+  # スタック（stacked PR）の扱い。
+  # base_branch: "auto" が分岐元ブランチを検出するため、既定のままスタックとして成立する。
+  # 下から順にPRを作れば GitHub が chain を検出してスタック化を提案する。
+  body_section: false  # 本文にスタック一覧を書くか。
+                       # GitHubがネイティブ表示するため既定 false（手書きすると二重管理になる）
+  cli: "none"          # none    = gh pr create の --base だけで構成する（追加依存なし）
+                       # gh-stack = gh stack link で明示登録する
+                       #            要 `gh extension install github/github/gh-stack`
+
 decision_record:
   # PR本文の「意思決定と経緯」セクションをどこまで書くか
   #   off      : セクションを出力しない

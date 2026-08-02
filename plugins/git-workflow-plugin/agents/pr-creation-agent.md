@@ -16,6 +16,7 @@ color: green
 2. **ベースブランチの決定**:
 
    - テンプレートの `base_branch` を確認（`"auto"` または未指定なら自動検出）
+   - 変更が複数の層に分かれる場合は、1本のPRにせずスタック（1 PR = 1変更）に割ることを提案する。`--base` を1つ下のブランチに向ければ GitHub 側がスタックとして扱う
    - 親ブランチ（分岐元）の検出:
      ```bash
      git log --first-parent --decorate=short --simplify-by-decoration --oneline
