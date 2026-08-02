@@ -38,17 +38,56 @@ types:
       tag: "タグ名"
       description: "説明"
 
+decision_record:
+  mode: "standard"          # off | minimal | standard | detailed
+  escalate_when: [mode を1段階上げる変更]
+  skip_when: [mode を1段階下げる変更]
+  modes:
+    "standard": [出力するセクションのkey]
+  sections:
+    - key: "セクションキー"
+      title: "見出し"
+      prompt: "何を書くかの指示"
+  format:
+    heading_style: "<title>:"
+    wrap_width: 72
+
 rules:
   granularity: "分割ルール"
   max_lines: 変更行数の目安
   forbidden_commands: [禁止コマンド]
 
 examples:
-  - "コミットメッセージ例"
+  - subject: "コミットメッセージ例"
+    mode: "standard"
+    body: |
+      本文例
 ```
+
+### decision_record セクション
+
+コミット本文に意思決定（背景・なぜ・代替案・影響）をどこまで書くかを制御する。実装プランを別ファイルに残す代わりに、判断の経緯をコミット本文へ蓄積する運用のための設定。
+
+| mode | 出力するセクション |
+|:-|:-|
+| `off` | 本文なし（subject のみ） |
+| `minimal` | なぜこの方法か |
+| `standard` | 背景 / なぜこの方法か / 影響とトレードオフ |
+| `detailed` | 背景 / なぜこの方法か / 検討した代替案 / 影響とトレードオフ / 参考 |
+
+- `decision_record` 自体が無い場合、`commit` スキルは `standard` として扱う
+- `modes` のキーは必ずクォートする（YAML 1.1 では `off` が真偽値として解釈されるため）
+- `sections` の `title` はコミット本文の見出し文字列になる。`git log --grep` の検索性に直結するため、プロジェクト内で表記を統一する
+- 見出しに行頭 `#` の Markdown 記法は使わない（エディタ経由の編集時に git がコメント行として除去することがある）
 
 ### カスタマイズ
 
 プロジェクトに不要なカテゴリやタイプは削除してよい。必要に応じて独自のタイプを追加してもよい。
+
+`decision_record` はプロジェクトの運用に合わせて調整する。
+
+- 本文を書かない運用にする → `mode: "off"`
+- 設計判断を厚く残す → `mode: "detailed"`
+- 独自のセクション（例: 「移行手順」「ロールバック方法」）を足す → `sections` に追加し、`modes` の対象 mode に key を並べる
 
 デフォルトテンプレートは `references/default-template.yml` を参照。
