@@ -8,6 +8,13 @@ resolve-reply:
   # 利用可能な変数: {commit_hash}
   # template: "✅ {commit_hash} で修正しました"
 
+# 修正完了後のPRへの報告コメント設定
+report:
+  # comment: 修正報告テンプレートに沿ったコメントをPRへ投稿する（デフォルト）
+  # chat:    PRへは投稿せず、チャットのサマリー報告のみ（従来動作）
+  # カスタムテンプレート: .plugin-workspace/pull-request/review-fix-report-template.md
+  mode: comment
+
 # プッシュ後のレビュー再依頼設定
 re-request-review:
   # auto: 全レビュアーに自動で再レビュー依頼を出す

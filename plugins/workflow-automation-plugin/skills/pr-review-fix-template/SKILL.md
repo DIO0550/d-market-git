@@ -73,11 +73,21 @@ argument-hint: (引数なし)
 
 選択結果を `pr-watch.review.on-unresolved` として設定ファイルに書き込む。監視対象レビュアー (`reviewers`) とポーリング間隔 (`poll-interval`) はデフォルトテンプレートの値 (`["copilot"]` / `60`) をそのまま書き出す（高度な設定はユーザーが生成後に手動編集する想定）。
 
+### Q6: 修正完了後のPRへの報告コメント
+
+全指摘の修正完了後に、修正内容の報告コメント（修正済み・スキップ・動作確認）をPRへ投稿するかどうか。
+
+> 修正完了後にPRへ報告コメントを投稿しますか？
+> 1. comment: 修正報告テンプレートに沿ったコメントをPRへ投稿する（デフォルト）
+> 2. chat:    PRへは投稿せず、チャットのサマリー報告のみ（従来動作）
+
+選択結果を `report.mode` として設定ファイルに書き込む。報告コメントのフォーマットをカスタマイズしたい場合は `.plugin-workspace/pull-request/review-fix-report-template.md` を配置する旨を案内する。
+
 ## 生成する設定ファイル
 
 パス: `{プロジェクトルート}/${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml`
 
-最終的な YAML は `resolve-reply`（Q1・Q2 の結果）、`re-request-review`（Q3 の結果）、`pr-watch`（Q4・Q5 の結果）の 3 セクションを常に合成して出力する。以下は各セクションのパターン。
+最終的な YAML は `resolve-reply`（Q1・Q2 の結果）、`re-request-review`（Q3 の結果）、`pr-watch`（Q4・Q5 の結果）、`report`（Q6 の結果）の 4 セクションを常に合成して出力する。以下は各セクションのパターン。
 
 ### `resolve-reply` セクションのパターン
 
@@ -141,6 +151,17 @@ pr-watch:
   poll-interval: 60
 ```
 
+### `report` セクション
+
+Q6 の回答をそのまま `mode` に書き込む（`comment` / `chat` のいずれか）。
+
+```yaml
+report:
+  # comment: 修正報告コメントをPRへ投稿する（デフォルト）
+  # chat:    チャットのサマリー報告のみ（従来動作）
+  mode: {comment | chat}
+```
+
 ### 合成例
 
 ```yaml
@@ -161,6 +182,9 @@ pr-watch:
       - copilot
     on-unresolved: auto
   poll-interval: 60
+
+report:
+  mode: comment
 ```
 
 ## 完了時
