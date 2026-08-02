@@ -86,7 +86,7 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 ```
 
 - subject と本文の間は空行1行
-- 見出しは `<見出し>:` を単独行に置く。**行頭 `#` は使わない**（git がコメント行として除去し、本文が黙って欠落する。`no-commit-md-heading` フックがブロックする）
+- 見出しは `<見出し>:` を単独行に置く。**行頭 `#` は使わない**（git がコメント行として除去し、本文が黙って欠落するため）
 - 本文は72桁前後で折り返す
 - 見出し文字列はテンプレートの `sections[].title` に揃える（`git log --grep` の検索性が表記の統一に依存するため）
 
@@ -135,7 +135,7 @@ mode別の記述例・NG例・履歴の追い方は `references/decision-record.
 
 ### 禁止コマンド
 
-`git add .` / `git add --all` / `git add -A` は `no-git-add-all` フックがブロックする。意図しないファイル（.env 等）の混入を防ぐため、ファイルは個別に指定する。
+`git add .` / `git add --all` / `git add -A` は使用禁止。意図しないファイル（.env 等）の混入を防ぐため、ファイルは個別に指定する。
 
 ### 禁止メッセージ
 
