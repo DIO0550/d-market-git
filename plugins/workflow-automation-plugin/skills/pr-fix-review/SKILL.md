@@ -26,15 +26,17 @@ PRのレビュー指摘を1つずつ修正するスキル。
    ↓
 7. 設定に応じてレビュー再依頼（auto / skip / ask）
    ↓
-8. サマリー報告
+8. PRへ修正報告コメントを投稿（設定に応じて）
    ↓
-9. pr-watch でPR監視を起動（--from-watch 時はスキップ）
+9. サマリー報告
+   ↓
+10. pr-watch でPR監視を起動（--from-watch 時はスキップ）
 ```
 
 ## 引数
 
 - `<PR番号>` 必須。修正対象のPR
-- `--from-watch` 省略可。pr-watch からの自動チェーン呼び出し時に指定する。指定時はステップ9（pr-watch 起動）をスキップする（監視は呼び出し元の pr-watch が継続中のため）
+- `--from-watch` 省略可。pr-watch からの自動チェーン呼び出し時に指定する。指定時はステップ10（pr-watch 起動）をスキップする（監視は呼び出し元の pr-watch が継続中のため）
 
 ### タスク管理ルール
 
@@ -74,6 +76,9 @@ resolve-reply:
 re-request-review:
   mode: skip             # プッシュ後のレビュー再依頼: auto / skip / ask（デフォルト: skip）
 
+report:
+  mode: comment          # comment: PRへ修正報告コメントを投稿 / chat: チャット報告のみ（デフォルト: comment）
+
 pr-watch:
   ci:
     on-failure: notify   # auto: pr-ci-fix へ自動チェーン / notify: 報告のみ（デフォルト: notify）
@@ -86,6 +91,9 @@ pr-watch:
 
 - `resolve-reply.enabled`: `true` の場合、スレッド解決前に返信コメントを投稿する
 - `resolve-reply.template`: 返信メッセージのテンプレート。`{commit_hash}` をショートコミットハッシュに置換する。**省略時はAIが指摘内容・修正内容に応じて適切な返信メッセージを生成する**
+- `report.mode`: 全修正完了後にPRへ修正報告コメントを投稿するかの挙動
+  - `comment`: 修正報告テンプレートに沿ったコメントをPRへ投稿する（デフォルト）
+  - `chat`: PRへは投稿せず、チャットのサマリー報告のみ（従来動作）
 - `re-request-review.mode`: プッシュ後に PR の全レビュアーへ再レビュー依頼を出すかの挙動
   - `auto`: `gh pr view` で取得した全レビュアーへ自動で再依頼する
   - `skip`: 再依頼しない（従来動作）
@@ -240,6 +248,41 @@ pr-watch:
      ```bash
      gh pr edit <PR番号> --add-reviewer copilot-pull-request-reviewer
      ```
+
+## 修正報告コメントの投稿
+
+全修正のプッシュ（およびレビュー再依頼）が完了した後、修正内容の報告コメントをPRへ投稿する。
+スレッドごとの返信（resolve-reply）が個別の指摘への応答であるのに対し、報告コメントは**この回の修正全体の記録**としてPRに残す。
+
+### 投稿条件
+
+- `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-review-fix.yml` の `report.mode` を読む
+- `comment` または未指定の場合は投稿する（デフォルト: `comment`）
+- `chat` の場合は投稿せず、チャットのサマリー報告のみ行う
+- 修正済みが0件（全スキップ）の場合は投稿しない（スキップ理由はチャットで報告する）
+
+### テンプレート解決の優先順位
+
+1. **`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/review-fix-report-template.md`**（プロジェクトカスタム）が存在する場合 → その構成を使用
+2. **`references/review-fix-report-template.md`**（ビルトインデフォルト）→ カスタムが存在しない場合のフォールバック
+
+### 記載内容
+
+| セクション | 必須 | 内容 |
+|:--|:--|:--|
+| 修正済み | 必須 | 指摘（path:line・投稿者）ごとの対応内容とコミットハッシュ |
+| スキップ | 条件付き | スキップした指摘と理由（なければセクションごと省略） |
+| 動作確認 | 必須 | 実施した確認（テスト・ビルド・Lint等）と結果。未実施なら「未実施」と正直に書く |
+| 備考 | 任意 | 対応中に気づいた点・別途見つかった課題（なければ省略） |
+
+### 投稿
+
+```bash
+gh pr comment {PR番号} --body "{テンプレートに従って組み立てた本文}"
+```
+
+- 実施していない動作確認を「実施した」と書かない
+- スキップ理由・対応内容はタスク実行時の記録と一致させる（創作しない）
 
 ## プッシュ後のPR監視
 
