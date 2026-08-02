@@ -74,12 +74,7 @@ examples:
 
 コミット本文に意思決定（背景・なぜ・代替案・影響）をどこまで書くかを制御する。実装プランを別ファイルに残す代わりに、判断の経緯をコミット本文へ蓄積する運用のための設定。
 
-| mode | 出力するセクション |
-|:-|:-|
-| `off` | 本文なし（subject のみ） |
-| `minimal` | なぜこの方法か |
-| `standard` | 背景 / なぜこの方法か / 影響とトレードオフ |
-| `detailed` | 背景 / なぜこの方法か / 検討した代替案 / 影響とトレードオフ / 参考 |
+`mode`（`off` / `minimal` / `standard` / `detailed`）と各 mode が出力するセクションの対応は `references/default-template.yml` の `decision_record.modes` が正典。
 
 - `decision_record` 自体が無い場合、`commit` スキルは `standard` として扱う
 - `modes` のキーは必ずクォートする（YAML 1.1 では `off` が真偽値として解釈されるため）

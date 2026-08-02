@@ -21,18 +21,13 @@ d-market-git は Claude Code プラグインのマーケットプレイスリポ
 <意思決定の記録（本文）>
 ```
 
-- 1 コミット = 1 変更（粒度を細かく保つ）
-- `git add -A` / `git add --all` / `git add .` は禁止（フックで強制）
+- 1 コミット = 1 変更（本文が長くなっても変更をまとめない）
 - 主要タグ: `✨ New Feature`, `🐛 Bug fix`, `♻️ Refactoring`, `📝 Documentation`, `🚀 Performance`, `🧪 Tests`, `👷 CI`, `🚚 Move`, `🔥 Remove`
+- 実装プランを別ファイルに残すと検索ノイズになり陳腐化するため、意思決定（背景・なぜ・代替案・影響）は本文に書く。詳細度は `decision_record.mode`（既定 `standard`）で制御する
+- 本文の見出しは `<見出し>:` を単独行に置く（行頭 `#` は git がコメント行として除去する）
+- フックで強制: 一括 `git add`（`no-git-add-all`）、本文の行頭 `#`（`no-commit-md-heading`）
 
-### 意思決定はコミット本文に残す
-
-実装プランや設計メモを別ファイルに残すと、完了後に検索ノイズになり仕様変更で陳腐化する。意思決定（背景・なぜこの方法か・検討した代替案・影響とトレードオフ）はコミット本文に書く。
-
-- 本文の詳細度は `.commit-template.yml` の `decision_record.mode` で制御（`off` / `minimal` / `standard` / `detailed`、デフォルト `standard`）
-- 本文の見出しは `<見出し>:` を単独行に置く。行頭 `#` の Markdown 見出しは使わない（git がコメント行として除去しうる）
-- 本文が長くなってもコミットを大きくしない（1 コミット = 1 変更は維持）
-- PR 本文も同様に `.pr-template.yml` の `decision_record` で「意思決定と経緯」を制御する
+書き方の詳細は `commit` スキル、PR 本文は `pull-request` スキルを参照する。
 
 ## 開発時の注意事項
 
