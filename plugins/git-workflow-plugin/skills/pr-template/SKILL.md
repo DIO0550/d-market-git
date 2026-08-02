@@ -39,6 +39,17 @@ body_sections:
     title: "概要"
     required: true
 
+decision_record:
+  mode: "standard"          # off | minimal | standard | detailed
+  escalate_when: [mode を1段階上げる変更]
+  source: "git log <base_branch>..HEAD --format=%B"
+  modes:
+    "standard": [出力するセクションのkey]
+  sections:
+    - key: "セクションキー"
+      title: "見出し"
+      prompt: "何を書くかの指示"
+
 rules:
   issue_link:
     required: true
@@ -59,6 +70,22 @@ examples:
 ### base_branch フィールド
 
 PRのマージ先ブランチを制御する。`"auto"` を指定すると、`pull-request` スキルが `git log --first-parent --decorate=short --simplify-by-decoration` で親ブランチ（分岐元）を自動検出する。特定のブランチ名（例: `"develop"`）を指定するとそのブランチを固定で使用する。未指定時は `"auto"` として扱う。
+
+### decision_record セクション
+
+PR 本文の「意思決定と経緯」をどこまで書くかを制御する。設計メモを別ファイルに残す代わりに、判断の経緯をコミット本文と PR 本文へ蓄積する運用のための設定。
+
+| mode | 出力する内容 |
+|:-|:-|
+| `off` | セクションを出力しない |
+| `minimal` | なぜこの方針かを 2-3 行 |
+| `standard` | 背景 / なぜこの方針か / 影響とトレードオフ |
+| `detailed` | standard + 検討した代替案 / 今回見送ったこと / 参考 |
+
+- `decision_record` 自体が無い場合、`pull-request` スキルは `standard` として扱う
+- `source` は各コミット本文に記録された意思決定の収集元コマンド。`commit` スキルの `decision_record` と対になる
+- `modes` のキーは必ずクォートする（YAML 1.1 では `off` が真偽値として解釈されるため）
+- `mode` を `off` にした場合は `body_sections` の `decisions` も併せて削除してよい
 
 ### pr_watch セクション
 
