@@ -1,6 +1,6 @@
 ---
 name: commit
-description: コミットルールスキル。コミットメッセージの書き方、分割ルール、禁止事項（git add -A 等）を定義。git commit を実行する前に必ず参照する（ユーザー指示の有無を問わない）。絵文字付きタイプ、Issue連携、細かい分割を遵守。
+description: コミットルールスキル。コミットメッセージの書き方、意思決定を残す本文の書き方、分割ルール、禁止事項（git add -A 等）を定義。git commit を実行する前に必ず参照する（ユーザー指示の有無を問わない）。絵文字付きタイプ、Issue連携、細かい分割を遵守。
 allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git diff *)
 ---
 
@@ -17,8 +17,10 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 ```
 <type>: #<Issue番号> <subject>
 
-[本文（任意）]
+[本文 — 意思決定の記録]
 ```
+
+本文の詳細度は `decision_record.mode` で制御する（デフォルト: `standard`）。詳細は「本文 — 意思決定の記録」を参照。
 
 ### タイプ一覧
 
@@ -130,6 +132,91 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 ✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加
 ```
 
+## 本文 — 意思決定の記録
+
+### 方針
+
+実装プランや設計メモを別ファイル（`docs/plans/`、`.specs/` 等）に残すと、完了後は検索ノイズになり、仕様変更のたびに「過去のプランも直すのか」が曖昧になって陳腐化する。**意思決定は変更差分と不可分なので、別ファイルではなくコミット本文に書く。**
+
+コミット本文に残す利点:
+
+- 差分と 1 対 1 で結びつく（どの判断がどのコードかを取り違えない）
+- `git log --grep` / `git log -S` / `git log -p` で過去の判断を検索できる
+- 完了後に「掃除」する必要がない（履歴は追記のみで、陳腐化しない）
+- 人も AI も `git log` だけで経緯を追える
+
+**本文は長くてよい。** subject は簡潔に、本文は必要なだけ書く。ただし本文を厚く書くことは、コミットを大きくしてよい理由にはならない（1 コミット = 1 変更は維持する）。
+
+### 何を書くか
+
+| | 内容 |
+|:-|:-|
+| 書く | なぜこの変更が必要か / なぜこの方法を選んだか / 何を検討して却下したか / 何を犠牲にしたか |
+| 書かない | 何をしたか（diff が語る） / 変更ファイルの羅列 / 変更行数 |
+
+### 詳細度（mode）
+
+`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` の `decision_record.mode` で制御する。テンプレート未作成時のデフォルトは `standard`。
+
+| mode | 本文に含めるセクション | 用途 |
+|:-|:-|:-|
+| `off` | （本文なし） | subject だけで運用するプロジェクト |
+| `minimal` | なぜこの方法か | 小さな変更が中心のプロジェクト |
+| `standard` | 背景 / なぜこの方法か / 影響とトレードオフ | **デフォルト** |
+| `detailed` | 背景 / なぜこの方法か / 検討した代替案 / 影響とトレードオフ / 参考 | 設計判断を厚く残すプロジェクト |
+
+セクション構成そのものもテンプレートの `decision_record.modes` / `decision_record.sections` で変更できる。
+
+### mode の上げ下げ
+
+`decision_record.escalate_when` に該当する変更は mode を 1 段階上げる（例: `standard` → `detailed`）。
+
+- アーキテクチャ・設計方針の変更
+- 破壊的変更
+- 外部に公開する API・仕様の変更
+- パフォーマンス・セキュリティ上のトレードオフを伴う変更
+- 非自明な回避策（workaround）の導入
+- 依存関係の追加・削除
+
+`decision_record.skip_when` に該当する変更は mode を 1 段階下げる（例: `standard` → `minimal`）。
+
+- タイポ修正 / フォーマッタ・Lint の自動修正 / 生成物・スナップショットの更新 / WIP コミット
+
+### 書式
+
+```
+<emoji> [<tag>]: #<Issue番号> <subject>
+
+背景:
+検索結果が多すぎて目的のユーザに到達できないという問い合わせが継続的に発生していた。
+
+なぜこの方法か:
+サーバ側での絞り込みを選択した。クライアント側で絞ると全件取得が前提になり、
+1万件規模のテナントで初期表示が実用外になるため。
+
+影響とトレードオフ:
+GET /api/users に role クエリパラメータを追加（未指定時の挙動は従来通り）。
+
+Refs #123
+```
+
+- subject と本文の間は必ず空行 1 行を入れる
+- 見出しは `<見出し>:` を単独行に置く。**行頭 `#` の Markdown 見出しは使わない**（エディタ経由でメッセージを編集した際に git がコメント行として除去することがあるため）
+- 本文は 72 桁前後で折り返す
+- 見出し文字列は `decision_record.sections[].title` の表記に揃える（`git log --grep` で引けるよう表記ゆれを作らない）
+- Issue 参照は subject に書く。追加の参照は本文末尾に `Refs #123` の形式で書く
+
+### 履歴の追い方
+
+```bash
+git log --grep="検討した代替案"        # 代替案を検討したコミットを探す
+git log --grep="なぜこの方法か" -p     # 判断理由と差分を並べて読む
+git log -S"functionName"               # ある識別子が増減したコミットを探す
+git log --follow -p -- <file>          # ファイルの変遷を判断理由込みで追う
+```
+
+記述例・NG 例は `references/decision-record.md` を参照。
+
 ## 分割ルール
 
 ### 基本方針
@@ -163,9 +250,20 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
   ```bash
   git commit -m "$(cat <<'EOF'
   ✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加
+
+  背景:
+  検索結果が多すぎて目的のユーザに到達できないという問い合わせが継続していた。
+
+  なぜこの方法か:
+  サーバ側での絞り込みを選択。クライアント側で絞ると全件取得が前提になり、
+  大規模テナントで初期表示が実用外になるため。
+
+  影響とトレードオフ:
+  GET /api/users に role クエリパラメータを追加（未指定時の挙動は従来通り）。
   EOF
   )"
   ```
+- 本文の見出しに行頭 `#` を使わない（git のコメント行と衝突しうるため）
 
 ## 禁止事項
 
@@ -194,4 +292,6 @@ git add -A
 2. どうした（操作）
 3. なぜ（目的/意図）
 
-詳細は `references/examples.md` を参照。
+1・2 は subject に、3 は本文（意思決定の記録）に書く。
+
+詳細は `references/examples.md`、本文の記述例は `references/decision-record.md` を参照。
