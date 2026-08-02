@@ -1,6 +1,7 @@
 ---
 name: pr-creation-agent
 description: "ユーザーがプルリクエスト（PR）作成を要求した際に使用。pull-requestスキルを参照して、1) プロジェクトのPRルールとテンプレートを取得、2) 現在の変更内容を分析、3) 適切なPR内容を生成してGitHubにPRを作成します。\n\n使用例:\n- \"PRを作成して\"\n- \"プルリクエストお願い\"\n- \"現在の変更でPRを作って\"\n- \"適切な内容でPRを作成して\"\n\nこのエージェントは自動的にPRテンプレートを参照し、変更内容に基づいた適切なタイトルと説明でPRを作成します。"
+tools: Bash, Read, Glob, Skill
 color: green
 ---
 
