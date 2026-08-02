@@ -11,13 +11,19 @@ allowed-tools: Read, Write, Glob
 
 ## 概要
 
-`references/default-template.yml` をベースに、`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` にテンプレートを生成する。
+`references/default-template.yml` をベースに、プロジェクト直下の `.claude/.pr-template.yml` にテンプレートを生成する。
+
+## 出力先
+
+既定はプロジェクト直下の `.claude/.pr-template.yml`。`decision_record.mode` のような運用方針はプロジェクトごとに変わるため、プラグインのインストール先ではなくプロジェクト側に置く。
+
+複数プロジェクトで共通の設定を使いたい場合のみ `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` に出力する。`pull-request` スキルはプロジェクト直下 → プラグイン配下 → `references/pr-template.md` の順で探す。
 
 ## 生成ルール
 
 1. `references/default-template.yml` の内容を読み込む
-2. プロジェクトの開発フローに合わせてタイプ・必須項目・チェック項目を調整する
-3. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` として出力する
+2. プロジェクトの開発フローに合わせてタイプ・必須項目・チェック項目・`decision_record.mode` を調整する
+3. `.claude/.pr-template.yml` として出力する
 
 ## テンプレート仕様
 

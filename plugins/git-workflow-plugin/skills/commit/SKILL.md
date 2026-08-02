@@ -10,7 +10,13 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 
 ## テンプレート参照
 
-`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` が存在する場合、そのテンプレートに定義されたタイプやルールを優先して使用する。テンプレートがない場合は、以下のデフォルトルールに従う。
+以下の順で探し、最初に見つかったものを使う。
+
+1. プロジェクト直下 `.claude/.commit-template.yml`
+2. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml`
+3. どちらも無ければ本スキルの既定ルール（`decision_record.mode` は `standard`）
+
+1 を先に見るのは、`decision_record.mode` のようなプロジェクト固有の運用方針を、プラグインのインストール先ではなくプロジェクト側で持てるようにするため。
 
 ## コミットメッセージ形式
 

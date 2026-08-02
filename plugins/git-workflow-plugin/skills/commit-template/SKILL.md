@@ -11,13 +11,19 @@ allowed-tools: Read, Write, Glob
 
 ## 概要
 
-`references/default-template.yml` をベースに、`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` にテンプレートを生成する。
+`references/default-template.yml` をベースに、プロジェクト直下の `.claude/.commit-template.yml` にテンプレートを生成する。
+
+## 出力先
+
+既定はプロジェクト直下の `.claude/.commit-template.yml`。`decision_record.mode` のような運用方針はプロジェクトごとに変わるため、プラグインのインストール先ではなくプロジェクト側に置く。
+
+複数プロジェクトで共通の設定を使いたい場合のみ `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` に出力する。`commit` スキルはプロジェクト直下 → プラグイン配下 → 既定値の順で探す。
 
 ## 生成ルール
 
 1. `references/default-template.yml` の内容を読み込む
-2. プロジェクトの要件に応じてタイプを取捨選択する
-3. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` として出力する
+2. プロジェクトの要件に応じてタイプを取捨選択し、`decision_record.mode` を決める
+3. `.claude/.commit-template.yml` として出力する
 
 ## テンプレート仕様
 

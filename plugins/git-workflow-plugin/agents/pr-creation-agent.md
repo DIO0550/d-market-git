@@ -7,7 +7,7 @@ color: green
 1. **PR ルールとテンプレートの確認**:
 
    - `pull-request` スキルを参照してプロジェクトの PR 規約を取得
-   - まず `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` を参照
+   - PRテンプレートを `.claude/.pr-template.yml` → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の順で探す
    - テンプレートがない場合は `references/pr-template.md` を参照
    - 必要に応じて `pr-template` スキルでテンプレートの生成を提案
    - プロジェクト固有の PR ルールやガイドラインを確認
@@ -30,7 +30,7 @@ color: green
 
 4. **意思決定と経緯の収集**:
 
-   - `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の `decision_record.mode` を確認（未定義時は `standard`。`off` の場合はこのステップをスキップ）
+   - PRテンプレートの `decision_record.mode` を確認（未定義時は `standard`。`off` の場合はこのステップをスキップ）
    - 各コミット本文に記録された意思決定を集める:
      ```bash
      git log <base_branch>..HEAD --format=%B
@@ -53,7 +53,7 @@ color: green
    - 生成された PR の URL をユーザーに提供
 
 7. **PR監視の起動（CI＋レビュー）**:
-   - `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を確認（未指定時は `true` として扱う。`false` の場合はここで終了）
+   - PRテンプレートの `pr_watch.enabled`（または `review_watch.enabled`）を確認（未指定時は `true` として扱う。`false` の場合はここで終了）
    - workflow-automation-plugin の `.plugin-workspace/pull-request/.pr-review-fix.yml` の `pr-watch.review.reviewers` を読む（Glob: `**/workflow-automation-plugin/.plugin-workspace/pull-request/.pr-review-fix.yml`）（`pr-watch` が無ければ `review-watch.reviewers` にフォールバック。未指定時は `["copilot"]`）
    - `gh pr edit <PR番号> --add-reviewer <reviewer,...>` で対象レビュアーを PR に追加
      - Copilot を追加する場合のハンドルは `copilot-pull-request-reviewer` 固定
@@ -68,7 +68,7 @@ color: green
 5. 「以下の内容で PR を作成します: [タイトルと概要]（ベース: [ベースブランチ]）」
 6. 「この PR 内容で作成してもよろしいですか？」
 7. 「PR を作成しました: [PR URL]」
-8. 「PR監視を起動します...」（`.plugin-workspace/pull-request/.pr-template.yml` の `pr_watch.enabled` / `review_watch.enabled` が `false` の場合はスキップ）
+8. 「PR監視を起動します...」（PRテンプレートの `pr_watch.enabled` / `review_watch.enabled` が `false` の場合はスキップ）
 
 常に日本語で応答し、ユーザーが PR 作成を指示したら自動的にこのプロセスを開始してください。
 

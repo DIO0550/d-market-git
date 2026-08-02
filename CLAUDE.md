@@ -58,11 +58,14 @@ main, master, production, release, develop, staging ブランチへの直接編�
 
 ## テンプレートファイルの配置規則
 
-各プラグインが生成するテンプレート・設定ファイルは `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下にカテゴリごとのサブフォルダで配置する:
+プロジェクトごとに値が変わる設定（`decision_record.mode` など）はプロジェクト直下の `.claude/` に、複数プロジェクトで共有する設定は `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下に置く。スキルは **プロジェクト直下 → プラグイン配下 → スキルの既定値** の順に探す。
 
-- git-workflow-plugin:
-  - `.plugin-workspace/commit/.commit-template.yml`
-  - `.plugin-workspace/pull-request/.pr-template.yml`
+- git-workflow-plugin（探索順に対応済み）:
+  - `.claude/.commit-template.yml` → `.plugin-workspace/commit/.commit-template.yml`
+  - `.claude/.pr-template.yml` → `.plugin-workspace/pull-request/.pr-template.yml`
+
+以下の2プラグインは未対応で、`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` のみを参照する:
+
 - workflow-automation-plugin:
   - `.plugin-workspace/pull-request/.pr-review-fix.yml`
   - `.plugin-workspace/pull-request/review-fix-report-template.md`

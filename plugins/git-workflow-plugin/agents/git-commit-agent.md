@@ -23,7 +23,7 @@ color: cyan
 
 4. **意思決定を記録する本文の生成**:
 
-   - `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` の `decision_record.mode` を確認（未定義時は `standard`）
+   - コミットテンプレート（`.claude/.commit-template.yml` → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` の順で探す）の `decision_record.mode` を確認（未定義時は `standard`）
    - `escalate_when` / `skip_when` に照らして mode を 1 段階上げ下げする
    - mode に対応するセクション（背景 / なぜこの方法か / 検討した代替案 / 影響とトレードオフ / 参考）を本文に書く
    - 書くのは「なぜ」。「何をしたか」は diff が語るので繰り返さない
