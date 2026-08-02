@@ -17,7 +17,7 @@ allowed-tools: Read, Write, Glob
 
 既定はプロジェクト直下の `.claude/.pr-template.yml`。`decision_record.mode` のような運用方針はプロジェクトごとに変わるため、プラグインのインストール先ではなくプロジェクト側に置く。
 
-複数プロジェクトで共通の設定を使いたい場合のみ `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` に出力する。`pull-request` スキルはプロジェクト直下 → プラグイン配下 → `references/pr-template.md` の順で探す。
+複数プロジェクトで共通の設定を使いたい場合のみ `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` に出力する。`pull-request` スキルはプロジェクト直下 → プラグイン配下 → `pull-request` スキルの `references/pr-template.md` の順で探す。
 
 ## 生成ルール
 

@@ -9,7 +9,7 @@ color: green
 
    - `pull-request` スキルを参照してプロジェクトの PR 規約を取得
    - PRテンプレートを `.claude/.pr-template.yml` → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の順で探す
-   - テンプレートがない場合は `references/pr-template.md` を参照
+   - どちらも無い場合は `pull-request` スキルの `references/pr-template.md` を参照
    - 必要に応じて `pr-template` スキルでテンプレートの生成を提案
    - プロジェクト固有の PR ルールやガイドラインを確認
 
