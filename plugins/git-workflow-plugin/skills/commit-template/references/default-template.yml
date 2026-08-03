@@ -171,6 +171,61 @@ types:
       tag: "Mock"
       description: "モック"
 
+decision_record:
+  # コミット本文に意思決定（背景・なぜ・代替案・影響）をどこまで書くか
+  #   off      : 本文を書かない（subjectのみ）
+  #   minimal  : 「なぜこの方法か」を1-3行
+  #   standard : 背景 / なぜこの方法か / 影響とトレードオフ（デフォルト）
+  #   detailed : standard + 検討した代替案 + 参考
+  mode: "standard"
+
+  # 該当する変更は mode を1段階上げる（standard -> detailed）
+  escalate_when:
+    - "アーキテクチャ・設計方針の変更"
+    - "破壊的変更"
+    - "外部に公開するAPI・仕様の変更"
+    - "パフォーマンス・セキュリティ上のトレードオフを伴う変更"
+    - "非自明な回避策(workaround)の導入"
+    - "依存関係の追加・削除"
+
+  # 該当する変更は mode を1段階下げる（standard -> minimal）
+  skip_when:
+    - "タイポ修正"
+    - "フォーマッタ・Lintの自動修正"
+    - "生成物・スナップショットの更新"
+    - "WIPコミット"
+
+  # mode ごとに出力するセクション（sections の key を並べる）
+  modes:
+    "off": []   # YAML 1.1 では off が真偽値になるためクォートする
+    "minimal": ["why"]
+    "standard": ["background", "why", "impact"]
+    "detailed": ["background", "why", "alternatives", "impact", "refs"]
+
+  sections:
+    - key: "background"
+      title: "背景"
+      prompt: "この変更が必要になった経緯・課題・制約。diffから読み取れない前提を書く"
+    - key: "why"
+      title: "なぜこの方法か"
+      prompt: "採用した方針とその理由。「何をしたか」ではなく「なぜそうしたか」を書く"
+    - key: "alternatives"
+      title: "検討した代替案"
+      prompt: "検討したが採用しなかった案と却下理由。再検討しうる条件があれば併記する"
+    - key: "impact"
+      title: "影響とトレードオフ"
+      prompt: "既存挙動・互換性・運用への影響、受け入れたトレードオフ"
+    - key: "refs"
+      title: "参考"
+      prompt: "Issue・PR・設計ドキュメント・外部資料へのリンク"
+
+  format:
+    # 見出しは "<title>:" を単独行に置く。
+    # 行頭 '#' はエディタ経由の編集時にgitがコメント行として除去しうるため使わない
+    heading_style: "<title>:"
+    wrap_width: 72
+    subject_max_length: 72
+
 rules:
   granularity: "1コミット = 1つの最小単位の変更"
   max_lines: 50
@@ -189,7 +244,26 @@ rules:
     - "update"
 
 examples:
-  - "✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加"
-  - "🐛 [Bug Fix]: #456 Firefox環境でのプロフィール画像アップロード失敗を修正"
-  - "♻️ [Refactoring]: #45 #67 認証ロジックをAuthServiceに集約"
-  - "📝 [Doc]: 開発環境セットアップ手順にNode 20要件を追記"
+  - subject: "✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加"
+    mode: "standard"
+    body: |
+      背景:
+      ユーザ一覧が数千件規模になり、目的のユーザに到達できないという
+      問い合わせが継続していた。
+
+      なぜこの方法か:
+      サーバ側での絞り込みを選択。クライアント側で絞ると全件取得が前提になり、
+      大規模テナントで初期表示が実用外になるため。
+
+      影響とトレードオフ:
+      GET /api/users に role クエリパラメータを追加（未指定時の挙動は従来通り）。
+  - subject: "🐛 [Bug Fix]: #456 Firefox環境でのプロフィール画像アップロード失敗を修正"
+    mode: "minimal"
+    body: |
+      なぜこの方法か:
+      FormDataにContent-Typeを明示していたためboundaryが欠落していた。
+      ヘッダ指定を外してブラウザに生成させる方式に統一した。
+  - subject: "♻️ [Refactoring]: #45 #67 認証ロジックをAuthServiceに集約"
+    mode: "standard"
+  - subject: "✏️ [Typo]: READMEのインストール手順の誤字を修正"
+    mode: "off"

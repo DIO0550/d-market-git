@@ -56,6 +56,15 @@ body_sections:
     title: "削除した内容"
     required: false
     prompt: "削除した機能やファイル"
+  - key: "decisions"
+    title: "意思決定と経緯"
+    required: "by_decision_record"  # 出力可否は decision_record.mode が決める（off なら省略）
+    prompt: >
+      なぜその方針を選んだかを記載する。
+      git log <base_branch>..HEAD --format=%B で各コミット本文の意思決定を集め、
+      PR全体としての方針判断に束ね直す（コミット本文の丸写しはしない）。
+      出力する内容は decision_record.mode に従う。
+      代替案は必ず却下理由とセットで書き、トレードオフは何を犠牲にしたかを書く。
   - key: "diagrams"
     title: "システム図"
     required: false
@@ -97,6 +106,63 @@ body_sections:
     required: false
     prompt: "レビュアーに重点的に見てほしい点"
 
+stack:
+  # スタック（stacked PR）の扱い。
+  # base_branch: "auto" が分岐元ブランチを検出するため、既定のままスタックとして成立する。
+  # 下から順にPRを作れば GitHub が chain を検出してスタック化を提案する。
+  body_section: false  # 本文にスタック一覧を書くか。
+                       # GitHubがネイティブ表示するため既定 false（手書きすると二重管理になる）
+  cli: "none"          # none    = gh pr create の --base だけで構成する（追加依存なし）
+                       # gh-stack = gh stack link で明示登録する
+                       #            要 `gh extension install github/github/gh-stack`
+
+decision_record:
+  # PR本文の「意思決定と経緯」セクションをどこまで書くか
+  #   off      : セクションを出力しない
+  #   minimal  : 「なぜこの方針か」を2-3行
+  #   standard : 背景 / なぜこの方針か / 影響とトレードオフ（デフォルト）
+  #   detailed : standard + 検討した代替案 + 今回見送ったこと + 参考
+  mode: "standard"
+
+  # 該当するPRは mode を1段階上げる（standard -> detailed）
+  escalate_when:
+    - "アーキテクチャ・設計方針の変更"
+    - "破壊的変更"
+    - "外部に公開するAPI・仕様の変更"
+    - "パフォーマンス・セキュリティ上のトレードオフを伴う変更"
+    - "依存関係の追加・削除"
+
+  # 各コミット本文に記録された意思決定の収集元
+  source: "git log <base_branch>..HEAD --format=%B"
+
+  # mode ごとに出力する小見出し（subsections の key を並べる）
+  modes:
+    "off": []   # YAML 1.1 では off が真偽値になるためクォートする
+    "minimal": ["why"]
+    "standard": ["background", "why", "impact"]
+    "detailed": ["background", "why", "alternatives", "impact", "deferred", "refs"]
+
+  # 小見出しの定義（body_sections とは別レイヤー。decisions セクションの内部構造）
+  subsections:
+    - key: "background"
+      title: "背景"
+      prompt: "この変更が必要になった経緯・課題・制約"
+    - key: "why"
+      title: "なぜこの方針か"
+      prompt: "PR全体として採用した方針とその理由"
+    - key: "alternatives"
+      title: "検討した代替案"
+      prompt: "採用しなかった案と却下理由。再検討しうる条件があれば併記する"
+    - key: "impact"
+      title: "影響とトレードオフ"
+      prompt: "既存挙動・互換性・運用への影響、受け入れたトレードオフ"
+    - key: "deferred"
+      title: "今回見送ったこと"
+      prompt: "スコープ外にした項目と理由。後続Issueがあれば番号を併記する"
+    - key: "refs"
+      title: "参考"
+      prompt: "Issue・設計ドキュメント・外部資料へのリンク"
+
 rules:
   issue_link:
     required: true
@@ -125,6 +191,7 @@ rules:
 
 checklist:
   - "セルフレビューを実施した"
+  - "意思決定と経緯を記載した（decision_record.mode が off 以外の場合）"
   - "必要なテストを実施した"
   - "必要なドキュメントを更新した（必要時）"
   - "関連IssueをPRにリンクした"

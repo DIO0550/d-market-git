@@ -1,7 +1,7 @@
 ---
 name: commit
-description: コミットルールスキル。コミットメッセージの書き方、分割ルール、禁止事項（git add -A 等）を定義。git commit を実行する前に必ず参照する（ユーザー指示の有無を問わない）。絵文字付きタイプ、Issue連携、細かい分割を遵守。
-allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git diff *)
+description: コミットルールスキル。コミットメッセージの書き方、意思決定を残す本文の書き方、分割ルール、禁止事項（git add -A 等）を定義。git commit を実行する前に必ず参照する（ユーザー指示の有無を問わない）。絵文字付きタイプ、Issue連携、細かい分割を遵守。
+allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git diff *), Read, Glob
 ---
 
 # コミットルール
@@ -10,125 +10,87 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 
 ## テンプレート参照
 
-`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` が存在する場合、そのテンプレートに定義されたタイプやルールを優先して使用する。テンプレートがない場合は、以下のデフォルトルールに従う。
+以下の順で探し、最初に見つかったものを使う。以降これを **コミットテンプレート** と呼ぶ。
+
+1. プロジェクト直下 `.claude/.commit-template.yml`
+2. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml`
+3. どちらも無ければ本スキルの既定ルール（`decision_record.mode` は `standard`）
+
+1 を先に見るのは、`decision_record.mode` のようなプロジェクト固有の運用方針を、プラグインのインストール先ではなくプロジェクト側で持てるようにするため。
 
 ## コミットメッセージ形式
 
 ```
-<type>: #<Issue番号> <subject>
+<emoji> [<tag>]: #<Issue番号> <subject>
 
-[本文（任意）]
+<意思決定の記録（本文）>
 ```
 
-### タイプ一覧
+### よく使うタイプ
 
-#### 基本
+| タイプ | フォーマット | | タイプ | フォーマット |
+|:-|:-|:-|:-|:-|
+| 新機能 | `✨ [New Feature]:` | | テスト | `🧪 [Tests]:` |
+| バグ修正 | `🐛 [Bug Fix]:` | | パフォーマンス | `🚀 [Performance]:` |
+| リファクタリング | `♻️ [Refactoring]:` | | 削除 | `🔥 [Remove]:` |
+| ドキュメント | `📝 [Doc]:` | | 移動/リネーム | `🚚 [Move]:` |
+| 設定ファイル | `🔧 [Config]:` | | CI/CD | `👷 [CI]:` |
+| 雑務 | `🔨 [Chore]:` | | 破壊的変更 | `💥 [Breaking]:` |
 
-| タイプ | フォーマット |
-|:-|:-|
-| 最初のコミット | 🎉 [Initial Commit]: |
-| 新機能 | ✨ [New Feature]: |
-| バグ修正 | 🐛 [Bug Fix]: |
-| ホットフィックス | 🚑 [Hotfix]: |
-| 簡単な修正 | 🩹 [Quick Fix]: |
-| リファクタリング | ♻️ [Refactoring]: |
-| コード構造改善 | 🎨 [Structure]: |
-| 削除 | 🔥 [Remove]: |
-| ファイル移動/リネーム | 🚚 [Move]: |
-| WIP | 🚧 [WIP]: |
-| 破壊的変更 | 💥 [Breaking]: |
-
-#### UI / スタイル
-
-| タイプ | フォーマット |
-|:-|:-|
-| UI/UX | 💄 [UI/UX]: |
-| アクセシビリティ | ♿ [Accessibility]: |
-| アニメーション | 💫 [Animation]: |
-| レスポンシブ | 📱 [Responsive]: |
-| アセット追加 | 🍱 [Assets]: |
-
-#### パフォーマンス / 品質
-
-| タイプ | フォーマット |
-|:-|:-|
-| パフォーマンス | 🚀 [Performance]: |
-| テスト | 🧪 [Tests]: |
-| テスト通過 | ✅ [Tests Pass]: |
-| セキュリティ | 🔒 [Security]: |
-| 型定義 | 🏷️ [Types]: |
-| バリデーション | 🦺 [Validation]: |
-
-#### ドキュメント / 設定
-
-| タイプ | フォーマット |
-|:-|:-|
-| ドキュメント | 📝 [Doc]: |
-| 設定ファイル | 🔧 [Config]: |
-| 環境変数 | 🔐 [Env]: |
-
-#### 依存関係
-
-| タイプ | フォーマット |
-|:-|:-|
-| 依存関係追加 | ➕ [Add Dep]: |
-| 依存関係削除 | ➖ [Remove Dep]: |
-| 依存関係更新 | ⬆️ [Upgrade Dep]: |
-| 依存関係ダウングレード | ⬇️ [Downgrade Dep]: |
-
-#### インフラ / CI/CD
-
-| タイプ | フォーマット |
-|:-|:-|
-| CI/CD | 👷 [CI]: |
-| Docker | 🐳 [Docker]: |
-| インフラ | 🧱 [Infra]: |
-| リリース | 📦 [Release]: |
-| デプロイ | 🚢 [Deploy]: |
-
-#### Git操作
-
-| タイプ | フォーマット |
-|:-|:-|
-| マージ | 🔀 [Merge]: |
-| リバート | ⏪ [Revert]: |
-
-#### データ / DB
-
-| タイプ | フォーマット |
-|:-|:-|
-| データベース | 🗃️ [DB]: |
-| シードデータ | 🌱 [Seed]: |
-
-#### コード品質
-
-| タイプ | フォーマット |
-|:-|:-|
-| タイポ修正 | ✏️ [Typo]: |
-| コメント追加 | 💡 [Comment]: |
-| ログ追加 | 🔊 [Log]: |
-| ログ削除 | 🔇 [Remove Log]: |
-| デッドコード削除 | ⚰️ [Dead Code]: |
-| Lint修正 | 🚨 [Lint]: |
-
-#### その他
-
-| タイプ | フォーマット |
-|:-|:-|
-| 国際化 | 🌐 [i18n]: |
-| 雑務 | 🔨 [Chore]: |
-| 実験 | ⚗️ [Experiment]: |
-| 認可/権限 | 🛂 [Auth]: |
-| DX改善 | 🧑‍💻 [DX]: |
-| モック | 🤡 [Mock]: |
+上記で表せない変更は、全タイプ（初回コミット・ホットフィックス・UI/UX・アクセシビリティ・セキュリティ・型定義・依存関係・Docker・DB・Lint・i18n 等）を定義した `${CLAUDE_PLUGIN_ROOT}/skills/commit-template/references/default-template.yml` の `types` から選ぶ。コミットテンプレートがある場合はそちらを優先する。
 
 ### Issue連携
 
-関連Issueがある場合はsubject行にIssue番号を記載:
+関連Issueがある場合はsubject行にIssue番号を記載する。複数可。
 
 ```
 ✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加
+♻️ [Refactoring]: #45 #67 認証ロジックをAuthServiceに集約
 ```
+
+## 本文 — 意思決定の記録
+
+### 方針
+
+実装プランや設計メモを別ファイルに残すと、完了後は検索ノイズになり、仕様変更のたびに更新の要否が曖昧になって陳腐化する。**意思決定は変更差分と不可分なので、コミット本文に書く。** 差分と1対1で結びつき、`git log --grep` で検索でき、完了後の掃除も要らない。
+
+書くのは **なぜ**（必要になった理由・その方法を選んだ理由・却下した案・犠牲にしたもの）。**何をしたか** は diff が語るので繰り返さない。
+
+**本文は長くてよい。** ただし本文を厚く書くことは、コミットを大きくしてよい理由にはならない（1コミット = 1変更は維持する）。
+
+### 詳細度の決定
+
+1. コミットテンプレートの `decision_record.mode` を読む（既定 `standard`）
+2. `escalate_when` に該当すれば1段階上げる（設計方針の変更・破壊的変更・公開APIの変更・非自明な回避策・依存関係の増減など）
+3. `skip_when` に該当すれば1段階下げる（タイポ・フォーマッタの自動修正・生成物の更新・WIPなど）
+4. 確定した mode の `modes` に並ぶセクションを、`sections[].title` の見出しで出力する
+
+| mode | 既定のセクション |
+|:-|:-|
+| `off` | 本文なし |
+| `minimal` | なぜこの方法か |
+| `standard` | 背景 / なぜこの方法か / 影響とトレードオフ |
+| `detailed` | + 検討した代替案 / 参考 |
+
+### 書式
+
+```
+✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加
+
+背景:
+検索結果が多すぎて目的のユーザに到達できないという問い合わせが継続していた。
+
+なぜこの方法か:
+サーバ側での絞り込みを選択。クライアント側で絞ると全件取得が前提になり、
+大規模テナントで初期表示が実用外になるため。
+```
+
+- subject と本文の間は空行1行
+- 見出しは `<見出し>:` を単独行に置く。**行頭 `#` は使わない**（git がコメント行として除去し、本文が黙って欠落するため）
+- 本文は72桁前後で折り返す
+- 見出し文字列はテンプレートの `sections[].title` に揃える（`git log --grep` の検索性が表記の統一に依存するため）
+
+mode別の記述例・NG例・履歴の追い方は `references/decision-record.md` を参照。
 
 ## 分割ルール
 
@@ -162,7 +124,9 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 - コミットメッセージは **heredoc** で渡す（ファイル書き出し `-F` は使わない）:
   ```bash
   git commit -m "$(cat <<'EOF'
-  ✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加
+  <subject>
+
+  <本文（上記「書式」に従う）>
   EOF
   )"
   ```
@@ -171,12 +135,7 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 
 ### 禁止コマンド
 
-```bash
-# これらは使用禁止
-git add .
-git add --all
-git add -A
-```
+`git add .` / `git add --all` / `git add -A` は使用禁止。意図しないファイル（.env 等）の混入を防ぐため、ファイルは個別に指定する。
 
 ### 禁止メッセージ
 
@@ -194,4 +153,4 @@ git add -A
 2. どうした（操作）
 3. なぜ（目的/意図）
 
-詳細は `references/examples.md` を参照。
+1・2 は subject に、3 は本文に書く。subject の NG→OK 例は `references/examples.md` を参照。

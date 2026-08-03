@@ -17,11 +17,17 @@ d-market-git は Claude Code プラグインのマーケットプレイスリポ
 
 ```
 <emoji> [<tag>]: #<Issue番号> <subject>
+
+<意思決定の記録（本文）>
 ```
 
-- 1 コミット = 1 変更（粒度を細かく保つ）
-- `git add -A` / `git add --all` / `git add .` は禁止（フックで強制）
+- 1 コミット = 1 変更（本文が長くなっても変更をまとめない）
 - 主要タグ: `✨ New Feature`, `🐛 Bug fix`, `♻️ Refactoring`, `📝 Documentation`, `🚀 Performance`, `🧪 Tests`, `👷 CI`, `🚚 Move`, `🔥 Remove`
+- 実装プランを別ファイルに残すと検索ノイズになり陳腐化するため、意思決定（背景・なぜ・代替案・影響）は本文に書く。詳細度は `decision_record.mode`（既定 `standard`）で制御する
+- 本文の見出しは `<見出し>:` を単独行に置く（行頭 `#` は git がコメント行として除去する）
+- フックで強制: 一括 `git add`（`no-git-add-all`）、本文の行頭 `#`（`no-commit-md-heading`）
+
+書き方の詳細は `commit` スキル、PR 本文は `pull-request` スキルを参照する。
 
 ## 開発時の注意事項
 
@@ -31,6 +37,7 @@ d-market-git は Claude Code プラグインのマーケットプレイスリポ
 - テンプレートのデフォルト値は `references/` ディレクトリに配置する
 - プラグインの説明文やスキルの内容は日本語で記述する
 - 外部依存は GitHub CLI (`gh`) のみ。パッケージマネージャは使用しない
+  - 例外として `gh` 拡張（`gh-stack` 等）を任意機能に使う場合は、既定を「拡張なしで動く」側に置き、拡張が要る旨をテンプレートのコメントに書く
 
 ## バージョン管理
 
@@ -47,11 +54,14 @@ main, master, production, release, develop, staging ブランチへの直接編�
 
 ## テンプレートファイルの配置規則
 
-各プラグインが生成するテンプレート・設定ファイルは `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下にカテゴリごとのサブフォルダで配置する:
+プロジェクトごとに値が変わる設定（`decision_record.mode` など）はプロジェクト直下の `.claude/` に、複数プロジェクトで共有する設定は `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下に置く。スキルは **プロジェクト直下 → プラグイン配下 → スキルの既定値** の順に探す。
 
-- git-workflow-plugin:
-  - `.plugin-workspace/commit/.commit-template.yml`
-  - `.plugin-workspace/pull-request/.pr-template.yml`
+- git-workflow-plugin（探索順に対応済み）:
+  - `.claude/.commit-template.yml` → `.plugin-workspace/commit/.commit-template.yml`
+  - `.claude/.pr-template.yml` → `.plugin-workspace/pull-request/.pr-template.yml`
+
+以下の2プラグインは未対応で、`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` のみを参照する:
+
 - workflow-automation-plugin:
   - `.plugin-workspace/pull-request/.pr-review-fix.yml`
   - `.plugin-workspace/pull-request/review-fix-report-template.md`

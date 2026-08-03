@@ -11,7 +11,7 @@ Git 操作支援プラグイン。コミット・PR 作成・ブランチ保護�
 | スキル | 説明 |
 |---|---|
 | `/commit` | 絵文字ベースのコミットメッセージ規約に従ったコミット作成 |
-| `/pull-request` | テンプレート・システム図付きの PR 作成 |
+| `/pull-request` | テンプレート・システム図付きの PR 作成（stacked PR 対応） |
 | `/pr-review` | 多角的なコードレビュー（バグ・セキュリティ・パフォーマンス・設計） |
 | `/commit-template` | コミットメッセージテンプレート（YAML）の生成 |
 | `/pr-template` | PR テンプレート（YAML）の生成 |
@@ -23,6 +23,7 @@ Git 操作支援プラグイン。コミット・PR 作成・ブランチ保護�
 **フック:**
 - `branch-protection` - 保護ブランチ（main, master, production 等）への直接編集を禁止
 - `no-git-add-all` - `git add -A / --all / .` による一括ステージングを禁止
+- `no-commit-md-heading` - コミット本文の行頭 `#` 見出しを禁止（git のコメント除去による本文の欠落を防ぐ）
 
 ### 2. workflow-automation-plugin
 
@@ -62,6 +63,8 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 
 ```
 <emoji> [<tag>]: #<Issue番号> <subject>
+
+<意思決定の記録（本文）>
 ```
 
 主要なタイプ:
@@ -76,6 +79,38 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 | 🧪 | Tests | テスト追加 |
 | 👷 | CI | CI 設定 |
 | 💄 | UI/UX | UI/スタイル変更 |
+
+### 意思決定はコミット本文に残す
+
+実装プランや設計メモを別ファイル（`docs/plans/` 等）に残すと、完了後は検索ノイズになり、仕様変更のたびに更新するか否かが曖昧になって陳腐化します。このプラグインでは、意思決定を変更差分と不可分なコミット本文に書きます。
+
+```
+♻️ [Refactoring]: #45 認証トークンの検証をAuthTokenVerifierに集約
+
+背景:
+トークン検証がミドルウェア・APIハンドラ・バッチの3箇所に複製されていた。
+
+なぜこの方法か:
+共通関数ではなくクラスに集約した。検証には公開鍵のキャッシュという状態が
+伴い、関数のままでは呼び出し側でキャッシュを持ち回る必要があったため。
+
+影響とトレードオフ:
+検証の失敗理由が例外型で返るようになり、呼び出し側が型で分岐できる。
+真偽値を返す既存APIは残していない。
+```
+
+`git log --grep="なぜこの方法か" -p` のように、判断理由と差分を並べて追えます。
+
+書く量は `decision_record.mode` で切り替えられます。
+
+| mode | 本文に含めるセクション |
+|---|---|
+| `off` | 本文なし（subject のみ） |
+| `minimal` | なぜこの方法か |
+| `standard` | 背景 / なぜこの方法か / 影響とトレードオフ（デフォルト） |
+| `detailed` | + 検討した代替案 / 参考 |
+
+設定は `/commit-template` で生成する `.commit-template.yml`（PR は `/pr-template` の `.pr-template.yml`）に置かれます。PR 本文にも同じ mode 体系で「意思決定と経緯」セクションが出力されます。
 
 ## セットアップ
 
@@ -109,14 +144,16 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 
 ### テンプレートの初期化（任意）
 
-プロジェクトごとにテンプレートをカスタマイズできます。各テンプレートは `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` 配下に生成されます。
+プロジェクトごとにテンプレートをカスタマイズできます。
 
 ```
-/commit-template    # .plugin-workspace/commit/.commit-template.yml を生成
-/pr-template        # .plugin-workspace/pull-request/.pr-template.yml を生成
+/commit-template    # .claude/.commit-template.yml を生成
+/pr-template        # .claude/.pr-template.yml を生成
 /issue-template     # .plugin-workspace/issues/issue-template.yml を生成
 /plan-template      # .plugin-workspace/issues/plan-issue-template.md, plan-report-template.md を生成
 ```
+
+`/commit-template` と `/pr-template` はプロジェクト直下の `.claude/` に生成します（`decision_record.mode` のような運用方針はプロジェクトごとに変わるため）。スキルは **プロジェクト直下 → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/` → 既定値** の順で探すので、複数プロジェクトで共有したい設定は後者に置けます。issues 系のテンプレートは `.plugin-workspace/` のみを参照します。
 
 ## ディレクトリ構成
 

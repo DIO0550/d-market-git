@@ -1,6 +1,6 @@
 ---
 name: pull-request
-description: プルリクエスト作成スキル。PRテンプレートに基づいた説明文の作成、変更種類の分類、チェックリストの確認を支援。「PR作成」「プルリクエスト」「レビュー依頼」などのリクエスト時に使用。
+description: プルリクエスト作成スキル。PRテンプレートに基づいた説明文の作成、変更種類の分類、意思決定と経緯の記載、チェックリストの確認を支援。「PR作成」「プルリクエスト」「レビュー依頼」などのリクエスト時に使用。
 allowed-tools: Bash(git *), Bash(gh pr *), Read, Glob, Skill
 ---
 
@@ -12,10 +12,13 @@ PRテンプレートに沿ったプルリクエスト説明文の作成を支援
 
 PR本文を作成する際は、以下の順でテンプレートを参照する。
 
-1. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml`
-2. `references/pr-template.md`（フォールバック）
+1. プロジェクト直下 `.claude/.pr-template.yml`
+2. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml`
+3. `references/pr-template.md`（フォールバック）
 
-`${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` がある場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
+1 を先に見るのは、`decision_record.mode` のようなプロジェクト固有の運用方針をプロジェクト側で持てるようにするため。YAMLテンプレートが見つかった場合は、その `title_format` / `types` / `body_sections` / `rules` / `checklist` に従ってPRタイトルと本文を生成する。テンプレートが未作成の場合は、`pr-template` スキルでテンプレート生成を提案してよい。
+
+以降このスキルで **PRテンプレート** と書いたものは、上記の順で解決した YAML を指す。
 
 ## ベースブランチの決定
 
@@ -23,13 +26,45 @@ PR作成時に `--base` フラグでマージ先ブランチを指定する。
 
 ### 決定順序
 
-1. `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の `base_branch` を確認
+1. PRテンプレートの `base_branch` を確認
 2. `"auto"` または未指定の場合 → 親ブランチを自動検出する:
    ```bash
    git log --first-parent --decorate=short --simplify-by-decoration --oneline
    ```
    出力の2行目以降で最初に現れるブランチ名が親ブランチ（分岐元）。検出できない場合は `main` にフォールバック
 3. 明示的なブランチ名が指定されている場合はそのまま使用
+
+## スタック（stacked PR）
+
+大きな変更は1本の PR にまとめず、**1 PR = 1変更** の連なり（スタック）に割る。各 PR の `--base` を1つ下のブランチに向けると、レビュアーはその層の差分だけを見られる。
+
+### 分割の判断基準
+
+以下に当てはまるなら、1本の PR にせずスタックに割る。
+
+- 「機能追加」と「その修正・リファクタリング」が混ざっている
+- 前半をマージしても後半と独立して意味をなす
+- コミット数が多く、レビュー観点が層で変わる（例: 規約の追加 → 監査指摘の修正）
+
+判断基準は `commit` スキルの分割ルールと同じ。1コミット = 1変更を PR の粒度に引き上げたもの。
+
+### 作り方
+
+`base_branch: "auto"` が分岐元ブランチを検出して `--base` に渡すため、**既定の設定のままスタックとして成立する**。下から順に PR を作れば、GitHub が chain を検出してスタック化を提案するバナーを表示する。
+
+```bash
+gh pr create --base <1つ下のブランチ> --title "..." --body "..."
+```
+
+`gh stack` 拡張（`gh extension install github/github/gh-stack`）を導入している場合のみ、`gh stack link` で明示的にスタック登録できる。拡張は必須ではない。
+
+### 注意
+
+- **本文にスタック一覧を手書きしない**。GitHub がネイティブに表示するため、二重管理になり更新漏れで食い違う。PRテンプレートの `stack.body_section` が `true` の場合のみ記載する
+- スタックは**同一リポジトリ内**の PR に限られる（cross-fork 不可）
+- 各 PR は自分の層の意思決定を持つ。スタック全体の設計判断は最下段の PR に書く
+- 親 PR がマージされた際の再ターゲットとカスケードリベースは GitHub 側が行う。merge commit / squash / rebase のいずれでも成立する
+- スタック機能は public preview のため、挙動が変わりうる
 
 ## コマンド実行規約
 
@@ -51,10 +86,47 @@ PR作成時に `--base` フラグでマージ先ブランチを指定する。
 1. **概要**: 変更の簡潔な説明
 2. **変更の種類**: タイプ分類（絵文字付き）
 3. **詳細な変更内容**: 追加・変更・削除の一覧
-4. **システム図**: 変更の視覚的な図解（テンプレートで有効時）
-5. **関連Issue**: Linked issues と連携キーワード
-6. **テスト**: 実施したテストと結果
-7. **レビューポイント**: 注目してほしい箇所
+4. **意思決定と経緯**: なぜその方針を選んだか（テンプレートで有効時）
+5. **システム図**: 変更の視覚的な図解（テンプレートで有効時）
+6. **関連Issue**: Linked issues と連携キーワード
+7. **テスト**: 実施したテストと結果
+8. **レビューポイント**: 注目してほしい箇所
+
+## 意思決定と経緯
+
+PR 本文には「何を変えたか」だけでなく「なぜその判断をしたか」を残す。設計メモを別ファイルに残すと完了後に陳腐化するため、判断は変更と不可分な場所（コミット本文と PR 本文）に置く。
+
+### 収集方法
+
+各コミットの本文には `commit` スキルの `decision_record` に従って意思決定が書かれている。PR 作成時はこれを集めて再構成する。
+
+```bash
+git log <base_branch>..HEAD --format=%B
+```
+
+- コミット本文の丸写しはしない。コミット単位の判断を **PR 全体としての方針判断** に束ね直す
+- コミット本文に判断が無い場合は、diff とブランチの経緯から補って書く
+
+### 詳細度（mode）
+
+PRテンプレートの `decision_record.mode` で制御する。テンプレート未作成時のデフォルトは `standard`。
+
+| mode | 出力する内容 |
+|:-|:-|
+| `off` | 意思決定セクションを出力しない |
+| `minimal` | なぜこの方針かを 2-3 行 |
+| `standard` | 背景 / なぜこの方針か / 影響とトレードオフ |
+| `detailed` | standard + 検討した代替案 / 今回見送ったこと / 参考 |
+
+`decision_record.escalate_when`（アーキテクチャ変更・破壊的変更・公開 API の変更など）に該当する PR は mode を 1 段階上げる。
+
+### 書式
+
+PR 本文は Markdown としてレンダリングされるため、`##` 見出しを使ってよい（行頭 `#` を避けるのはコミット本文側のルール）。
+
+- 代替案は必ず **却下理由** とセットで書く。理由の無い列挙はレビュアーの判断材料にならない
+- トレードオフは「何を犠牲にしたか」を書く。利点だけを並べない
+- 今回見送った項目は、後続 Issue 番号があれば併記する
 
 ## システム図
 
@@ -120,6 +192,7 @@ PR作成前の確認事項:
 - [ ] 適切なコミットメッセージ
 - [ ] IssueがPRにLinked
 - [ ] セルフレビュー実施
+- [ ] 意思決定と経緯を記載（`decision_record.mode` が `off` 以外の場合）
 - [ ] 破壊的変更の明記（該当時）
 
 デフォルトテンプレートは `references/pr-template.md` を参照。
@@ -130,7 +203,7 @@ PR作成成功後に `pr-watch` スキルを起動してCI完了とCopilot等の
 
 ### 起動条件
 
-- `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/pull-request/.pr-template.yml` の `pr_watch.enabled`（または `review_watch.enabled`）を参照する
+- PRテンプレートの `pr_watch.enabled`（または `review_watch.enabled`）を参照する
 - `false` に明示されている場合は監視しない
 - `true` または未指定の場合は監視を起動する（デフォルト: `true`）
 
