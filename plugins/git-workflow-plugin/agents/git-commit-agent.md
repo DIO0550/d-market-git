@@ -26,7 +26,7 @@ color: cyan
 
    - コミットテンプレート（`.claude/.commit-template.yml` → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` の順で探す）の `decision_record.mode` を確認（未定義時は `standard`）
    - `escalate_when` / `skip_when` に照らして mode を 1 段階上げ下げする
-   - mode に対応するセクション（変更内容 / 背景 / 理由 / 代替案 / 影響 / 参考）を本文に書く
+   - mode に対応するセクション（変更内容 / 背景 / 採用理由 / 代替案 / トレードオフ / 参考）を本文に書く
    - 変更内容には「何をしたか」の要約を箇条書きで書く。意思決定のセクションに書くのは「なぜ」であり、「何をしたか」を繰り返さない
    - 見出しは `<見出し>:` を単独行に置き、行頭 `#` の Markdown 見出しは使わない（git がコメント行として除去しうるため）
 

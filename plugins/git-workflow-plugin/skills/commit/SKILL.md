@@ -68,8 +68,8 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 | mode | 既定のセクション |
 |:-|:-|
 | `off` | 本文なし |
-| `minimal` | 変更内容 / 理由 |
-| `standard` | 変更内容 / 背景 / 理由 / 影響 |
+| `minimal` | 変更内容 / 採用理由 |
+| `standard` | 変更内容 / 背景 / 採用理由 / トレードオフ |
 | `detailed` | + 代替案 / 参考 |
 
 ### 書式
@@ -84,7 +84,7 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 背景:
 検索結果が多すぎて目的のユーザに到達できないという問い合わせが継続していた。
 
-理由:
+採用理由:
 サーバ側での絞り込みを選択。クライアント側で絞ると全件取得が前提になり、
 大規模テナントで初期表示が実用外になるため。
 ```
