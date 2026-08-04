@@ -69,7 +69,7 @@ allowed-tools: Bash(git add *), Bash(git commit *), Bash(git status), Bash(git d
 |:-|:-|
 | `off` | 本文なし |
 | `minimal` | 採用理由 |
-| `standard` | 背景 / 採用理由 / トレードオフ |
+| `standard` | 背景 / 採用理由 / 影響とトレードオフ |
 | `detailed` | + 代替案 / 参考 |
 
 `off` を除く全 mode で、セクションの前に見出しなしの変更内容の要約（箇条書き）を置く。

@@ -27,7 +27,7 @@ color: cyan
    - コミットテンプレート（`.claude/.commit-template.yml` → `${CLAUDE_PLUGIN_ROOT}/.plugin-workspace/commit/.commit-template.yml` の順で探す）の `decision_record.mode` を確認（未定義時は `standard`）
    - `escalate_when` / `skip_when` に照らして mode を 1 段階上げ下げする
    - 本文は「何をしたか」の要約（見出しなしの箇条書き）で始める（off を除く全 mode 共通）
-   - 続けて mode に対応するセクション（背景 / 採用理由 / 代替案 / トレードオフ / 参考）を書く。書くのは「なぜ」であり、冒頭の要約と「何をしたか」を繰り返さない
+   - 続けて mode に対応するセクション（背景 / 採用理由 / 代替案 / 影響とトレードオフ / 参考）を書く。書くのは「なぜ」であり、冒頭の要約と「何をしたか」を繰り返さない
    - 見出しは `<見出し>:` を単独行に置き、行頭 `#` の Markdown 見出しは使わない（git がコメント行として除去しうるため）
 
 5. **コミットの実行**:
