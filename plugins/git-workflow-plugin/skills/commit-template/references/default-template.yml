@@ -174,10 +174,16 @@ types:
 decision_record:
   # コミット本文に変更内容と意思決定（背景・採用理由・代替案・トレードオフ）をどこまで書くか
   #   off      : 本文を書かない（subjectのみ）
-  #   minimal  : 変更内容 / 採用理由
-  #   standard : 変更内容 / 背景 / 採用理由 / トレードオフ（デフォルト）
+  #   minimal  : 変更内容 + 採用理由
+  #   standard : 変更内容 + 背景 / 採用理由 / トレードオフ（デフォルト）
   #   detailed : standard + 代替案 + 参考
   mode: "standard"
+
+  # 本文の書き出し（off を除く全 mode 共通）:
+  # subject 直後に「何をしたか」の要約を箇条書きで書く。見出しは付けない
+  summary:
+    style: "bullet"
+    heading: ""
 
   # 該当する変更は mode を1段階上げる（standard -> detailed）
   escalate_when:
@@ -198,14 +204,11 @@ decision_record:
   # mode ごとに出力するセクション（sections の key を並べる）
   modes:
     "off": []   # YAML 1.1 では off が真偽値になるためクォートする
-    "minimal": ["changes", "why"]
-    "standard": ["changes", "background", "why", "impact"]
-    "detailed": ["changes", "background", "why", "alternatives", "impact", "refs"]
+    "minimal": ["why"]
+    "standard": ["background", "why", "impact"]
+    "detailed": ["background", "why", "alternatives", "impact", "refs"]
 
   sections:
-    - key: "changes"
-      title: "変更内容"
-      prompt: "何を変更したかの要約を箇条書きで。diffの逐語訳ではなく、変更の趣旨がわかる粒度で書く"
     - key: "background"
       title: "背景"
       prompt: "この変更が必要になった経緯・課題・制約。diffから読み取れない前提を書く"
@@ -250,7 +253,6 @@ examples:
   - subject: "✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加"
     mode: "standard"
     body: |
-      変更内容:
       - GET /api/users に role クエリパラメータを追加
       - 検索フォームにロール絞り込みのセレクトボックスを追加
 
@@ -267,7 +269,6 @@ examples:
   - subject: "🐛 [Bug Fix]: #456 Firefox環境でのプロフィール画像アップロード失敗を修正"
     mode: "minimal"
     body: |
-      変更内容:
       - アップロード時のContent-Typeヘッダの明示指定を削除
 
       採用理由:

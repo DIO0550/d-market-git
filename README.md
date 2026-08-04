@@ -64,7 +64,7 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 ```
 <emoji> [<tag>]: #<Issue番号> <subject>
 
-<意思決定の記録（本文）>
+<変更内容と意思決定の記録（本文）>
 ```
 
 主要なタイプ:
@@ -87,7 +87,6 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 ```
 ♻️ [Refactoring]: #45 認証トークンの検証をAuthTokenVerifierに集約
 
-変更内容:
 - 3箇所に複製されていたトークン検証をAuthTokenVerifierに集約
 - 検証失敗を真偽値ではなく例外型で返すよう変更
 
@@ -110,9 +109,11 @@ GitHub Issue ワークフロープラグインです。仕様書からの Issue 
 | mode | 本文に含めるセクション |
 |---|---|
 | `off` | 本文なし（subject のみ） |
-| `minimal` | 変更内容 / 採用理由 |
-| `standard` | 変更内容 / 背景 / 採用理由 / トレードオフ（デフォルト） |
+| `minimal` | 採用理由 |
+| `standard` | 背景 / 採用理由 / トレードオフ（デフォルト） |
 | `detailed` | + 代替案 / 参考 |
+
+`off` を除く全 mode で、本文はセクションの前に見出しなしの変更内容の要約（箇条書き）で始まります。
 
 設定は `/commit-template` で生成する `.commit-template.yml`（PR は `/pr-template` の `.pr-template.yml`）に置かれます。PR 本文にも同じ mode 体系で「意思決定と経緯」セクションが出力されます。
 

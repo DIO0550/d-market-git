@@ -46,6 +46,9 @@ types:
 
 decision_record:
   mode: "standard"          # off | minimal | standard | detailed
+  summary:                  # 本文冒頭の変更内容の要約（off を除く全 mode 共通）
+    style: "bullet"
+    heading: ""             # 見出しは付けない
   escalate_when: [mode を1段階上げる変更]
   skip_when: [mode を1段階下げる変更]
   modes:

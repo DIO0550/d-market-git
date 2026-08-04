@@ -23,7 +23,7 @@ d-market-git は Claude Code プラグインのマーケットプレイスリポ
 
 - 1 コミット = 1 変更（本文が長くなっても変更をまとめない）
 - 主要タグ: `✨ New Feature`, `🐛 Bug fix`, `♻️ Refactoring`, `📝 Documentation`, `🚀 Performance`, `🧪 Tests`, `👷 CI`, `🚚 Move`, `🔥 Remove`
-- 本文は「変更内容」（何をしたかの要約を箇条書き）で始める
+- 本文は変更内容の要約（見出しなしの箇条書き）で始める
 - 実装プランを別ファイルに残すと検索ノイズになり陳腐化するため、意思決定（背景・採用理由・代替案・トレードオフ）は本文に書く。詳細度は `decision_record.mode`（既定 `standard`）で制御する
 - 本文の見出しは `<見出し>:` を単独行に置く（行頭 `#` は git がコメント行として除去する）
 - フックで強制: 一括 `git add`（`no-git-add-all`）、本文の行頭 `#`（`no-commit-md-heading`）
