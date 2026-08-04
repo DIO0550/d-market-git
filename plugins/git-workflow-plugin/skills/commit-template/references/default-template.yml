@@ -172,12 +172,18 @@ types:
       description: "モック"
 
 decision_record:
-  # コミット本文に意思決定（背景・なぜ・代替案・影響）をどこまで書くか
+  # コミット本文に変更内容と意思決定（背景・採用理由・代替案・影響とトレードオフ）をどこまで書くか
   #   off      : 本文を書かない（subjectのみ）
-  #   minimal  : 「なぜこの方法か」を1-3行
-  #   standard : 背景 / なぜこの方法か / 影響とトレードオフ（デフォルト）
-  #   detailed : standard + 検討した代替案 + 参考
+  #   minimal  : 変更内容 + 採用理由
+  #   standard : 変更内容 + 背景 / 採用理由 / 影響とトレードオフ（デフォルト）
+  #   detailed : standard + 代替案 + 参考
   mode: "standard"
+
+  # 本文の書き出し（off を除く全 mode 共通）:
+  # subject 直後に「何をしたか」の要約を箇条書きで書く。見出しは付けない
+  summary:
+    style: "bullet"
+    heading: ""
 
   # 該当する変更は mode を1段階上げる（standard -> detailed）
   escalate_when:
@@ -207,10 +213,10 @@ decision_record:
       title: "背景"
       prompt: "この変更が必要になった経緯・課題・制約。diffから読み取れない前提を書く"
     - key: "why"
-      title: "なぜこの方法か"
-      prompt: "採用した方針とその理由。「何をしたか」ではなく「なぜそうしたか」を書く"
+      title: "採用理由"
+      prompt: "その方法を採用した理由。「何をしたか」は変更内容に任せ、「なぜそうしたか」を書く"
     - key: "alternatives"
-      title: "検討した代替案"
+      title: "代替案"
       prompt: "検討したが採用しなかった案と却下理由。再検討しうる条件があれば併記する"
     - key: "impact"
       title: "影響とトレードオフ"
@@ -247,20 +253,25 @@ examples:
   - subject: "✨ [New Feature]: #123 ユーザ検索にロール絞り込みフィルタを追加"
     mode: "standard"
     body: |
+      - GET /api/users に role クエリパラメータを追加
+      - 検索フォームにロール絞り込みのセレクトボックスを追加
+
       背景:
       ユーザ一覧が数千件規模になり、目的のユーザに到達できないという
       問い合わせが継続していた。
 
-      なぜこの方法か:
+      採用理由:
       サーバ側での絞り込みを選択。クライアント側で絞ると全件取得が前提になり、
       大規模テナントで初期表示が実用外になるため。
 
       影響とトレードオフ:
-      GET /api/users に role クエリパラメータを追加（未指定時の挙動は従来通り）。
+      role 未指定時の挙動は従来通りで、既存クライアントへの影響はない。
   - subject: "🐛 [Bug Fix]: #456 Firefox環境でのプロフィール画像アップロード失敗を修正"
     mode: "minimal"
     body: |
-      なぜこの方法か:
+      - アップロード時のContent-Typeヘッダの明示指定を削除
+
+      採用理由:
       FormDataにContent-Typeを明示していたためboundaryが欠落していた。
       ヘッダ指定を外してブラウザに生成させる方式に統一した。
   - subject: "♻️ [Refactoring]: #45 #67 認証ロジックをAuthServiceに集約"

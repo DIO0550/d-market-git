@@ -1,6 +1,6 @@
 {
   "name": "git-workflow-plugin",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "Git操作支援プラグイン（コミット・PR作成・意思決定の記録・ブランチ保護）",
   "author": {
     "name": "DIO0550"

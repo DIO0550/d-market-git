@@ -49,7 +49,7 @@ if [ -n "$offending" ]; then
         hookSpecificOutput: {
             hookEventName: "PreToolUse",
             permissionDecision: "deny",
-            permissionDecisionReason: ("コミットメッセージ本文に行頭 `#` の Markdown 見出しが含まれています。\n\n検出された行:\n" + $lines + "\n\n理由:\n- git は core.commentChar（既定 `#`）で始まる行をコメントとして除去します\n- `git commit -m` の時点では残りますが、後で `git commit --amend` や `git rebase --reword` をエディタ経由で行うと、その時点で該当行が黙って消えます\n- 意思決定をコミット本文に残す運用では、この欠落は記録の喪失になります\n\n対処:\n- 見出しは `<見出し>:` を単独行に置いてください（例: `背景:` `なぜこの方法か:`）\n- 見出し文字列は commit テンプレートの `decision_record.sections[].title` に揃えてください\n- どうしても行頭 `#` が必要な場合は、その行を1文字以上インデントしてください（桁0でなければ除去されません）")
+            permissionDecisionReason: ("コミットメッセージ本文に行頭 `#` の Markdown 見出しが含まれています。\n\n検出された行:\n" + $lines + "\n\n理由:\n- git は core.commentChar（既定 `#`）で始まる行をコメントとして除去します\n- `git commit -m` の時点では残りますが、後で `git commit --amend` や `git rebase --reword` をエディタ経由で行うと、その時点で該当行が黙って消えます\n- 意思決定をコミット本文に残す運用では、この欠落は記録の喪失になります\n\n対処:\n- 見出しは `<見出し>:` を単独行に置いてください（例: `背景:` `採用理由:`）\n- 見出し文字列は commit テンプレートの `decision_record.sections[].title` に揃えてください\n- どうしても行頭 `#` が必要な場合は、その行を1文字以上インデントしてください（桁0でなければ除去されません）")
         }
     }'
     exit 0

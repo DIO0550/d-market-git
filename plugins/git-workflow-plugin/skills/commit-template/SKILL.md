@@ -46,6 +46,9 @@ types:
 
 decision_record:
   mode: "standard"          # off | minimal | standard | detailed
+  summary:                  # 本文冒頭の変更内容の要約（off を除く全 mode 共通）
+    style: "bullet"
+    heading: ""             # 見出しは付けない
   escalate_when: [mode を1段階上げる変更]
   skip_when: [mode を1段階下げる変更]
   modes:
@@ -72,7 +75,7 @@ examples:
 
 ### decision_record セクション
 
-コミット本文に意思決定（背景・なぜ・代替案・影響）をどこまで書くかを制御する。実装プランを別ファイルに残す代わりに、判断の経緯をコミット本文へ蓄積する運用のための設定。
+コミット本文に変更内容と意思決定（背景・理由・代替案・影響）をどこまで書くかを制御する。実装プランを別ファイルに残す代わりに、変更の要約と判断の経緯をコミット本文へ蓄積する運用のための設定。
 
 `mode`（`off` / `minimal` / `standard` / `detailed`）と各 mode が出力するセクションの対応は `references/default-template.yml` の `decision_record.modes` が正典。
 
