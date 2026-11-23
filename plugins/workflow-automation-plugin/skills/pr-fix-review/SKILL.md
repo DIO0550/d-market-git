@@ -222,16 +222,16 @@ pr-watch:
    - ファイルまたはキーが存在しない場合は `skip` として扱う
 
 3. **`skip` の場合**
-   - 何もしない。サマリー報告へ進む
+   - 何もしない。次のセクション（修正報告コメントの投稿）へ進む
 
 4. **`auto` / `ask` の場合、レビュアーを取得する**
    ```bash
    gh pr view <PR番号> --json reviews --jq '[.reviews[].author.login] | unique | map(select(. != null))'
    ```
-   - 取得結果が 0 人の場合は再依頼をスキップしてサマリー報告へ進む
+   - 取得結果が 0 人の場合は再依頼をスキップして次のセクション（修正報告コメントの投稿）へ進む
    - **Copilot が過去にレビューしている場合の注意**: `.reviews[].author.login` では Copilot のハンドルが取得できない／別名になることがある。Copilot によるレビューの有無は以下で判定する:
      ```bash
-     gh pr view <PR番号> --json reviews --jq '[.reviews[] | select(.author.login == "Copilot" or (.author.login // "") | test("copilot"; "i"))] | length'
+     gh pr view <PR番号> --json reviews --jq '[.reviews[] | select((.author.login // "") | test("copilot"; "i"))] | length'
      ```
      1 以上なら再依頼対象に `copilot-pull-request-reviewer` を追加する（`gh pr edit --add-reviewer` に渡すハンドルはこの固定値）
 
@@ -278,7 +278,10 @@ pr-watch:
 ### 投稿
 
 ```bash
-gh pr comment {PR番号} --body "{テンプレートに従って組み立てた本文}"
+gh pr comment {PR番号} --body "$(cat <<'EOF'
+{テンプレートに従って組み立てた本文}
+EOF
+)"
 ```
 
 - 実施していない動作確認を「実施した」と書かない

@@ -1,6 +1,6 @@
 {
   "name": "issues-workflow-plugin",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "GitHub Issueワークフロープラグイン（仕様書からのIssue自動生成・実装プランのIssue直書き・テンプレート定義）",
   "author": {
     "name": "DIO0550"
