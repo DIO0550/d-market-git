@@ -32,7 +32,7 @@ Issue本文・タイトル・ラベルのフォーマットは以下の優先順
 
 - **タイトル形式**: `title_formats` セクションのタイプ別フォーマットを使用
 - **Issue本文**: `types[].body_sections` の定義に従い、`required: true` のセクションは必ず含める。`format: "checklist"` のセクションはチェックリスト形式で出力
-- **ラベル**: `labels` セクションの定義を使用。`detection_keywords` でエリア自動判定
+- **ラベル**: `labels` セクションの定義を使用。`labels.area[].keywords` でエリア自動判定
 - **品質ルール**: `rules` セクションのルールを適用（タイトル長、必須セクション等）
 - **Epic**: `epic` セクションの定義を使用
 
@@ -505,10 +505,10 @@ gh api graphql -f query='
 
 ## ラベル
 
-リポジトリにラベルがない場合、`scripts/create-github-labels.sh`で一括作成:
+リポジトリにラベルがない場合、`${CLAUDE_PLUGIN_ROOT}/scripts/create-github-labels.sh` で一括作成:
 
 ```bash
-bash plugins/issues-workflow-plugin/scripts/create-github-labels.sh
+bash "${CLAUDE_PLUGIN_ROOT}/scripts/create-github-labels.sh"
 ```
 
 | カテゴリ | ラベル | 説明 |
