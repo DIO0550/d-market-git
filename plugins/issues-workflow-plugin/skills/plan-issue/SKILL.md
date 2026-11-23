@@ -3,7 +3,7 @@ name: plan-issue
 description: 実装プランをMDファイルの代わりにGitHub Issueとして直接書き起こす。意思決定（検討した選択肢・決定理由）と実装方針を記録する厚いフォーマット。1プラン = 1 Issue。発番されたIssue番号をコミットメッセージに使える。ユーザーが明示的に呼び出した場合のみ使用。
 user-invocable: true
 disable-model-invocation: true
-allowed-tools: Bash(gh *), Bash(git *), Read, Write, Glob, Grep, AskUserQuestion
+allowed-tools: Bash(gh *), Bash(git *), Read, Glob, Grep, AskUserQuestion
 argument-hint: [プランの概要（省略時は会話の文脈から作成）]
 ---
 
@@ -130,7 +130,7 @@ PLAN_NUM=$(echo "$PLAN_URL" | grep -oE '[0-9]+$')
 ```
 
 - ラベルは `type:plan` を必ず付与する。内容から判定できる場合は `area:*` / `size:*` ラベルも付与する（判定基準は `spec-to-issues` スキルと同一）
-- `type:plan` ラベルが存在しない場合は `scripts/create-github-labels.sh` の実行を案内する
+- `type:plan` ラベルが存在しない場合は `${CLAUDE_PLUGIN_ROOT}/scripts/create-github-labels.sh` の実行を案内する
 
 ### Step 6: 完了報告
 
