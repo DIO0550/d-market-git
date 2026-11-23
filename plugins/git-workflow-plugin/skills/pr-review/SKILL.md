@@ -16,7 +16,7 @@ PR番号・ブランチ名・PR URLから差分を取得し、プロジェクト
 
 `gh` コマンドはPR番号・ブランチ名・URLのいずれも受け付けるため、`$0` をそのまま渡す。
 
-- PR情報: !`gh pr view "$0" --json number,title,body,baseRefName,headRefName,url 2>/dev/null`
+- PR情報: !`gh pr view "$0" --json number,title,body,baseRefName,headRefName,headRefOid,url 2>/dev/null`
 - 変更ファイル一覧: !`gh pr diff "$0" --name-only 2>/dev/null`
 - diff: !`gh pr diff "$0" 2>/dev/null`
 
@@ -27,13 +27,13 @@ PR番号・ブランチ名・PR URLから差分を取得し、プロジェクト
 
 ### 引数なしの場合
 
-オープン中のPR一覧を取得してユーザーに選択させる。
+引数なしで起動された場合、上記の自動取得コマンド（`"$0"`）は空または失敗となるが、中断せず以下の手順へ進む。オープン中のPR一覧を取得してユーザーに選択させる。
 
 ```bash
 gh pr list --state open --json number,title,headRefName --template '{{range .}}#{{.number}} {{.title}} ({{.headRefName}}){{"\n"}}{{end}}'
 ```
 
-番号とタイトルの一覧をユーザーに提示し、レビュー対象を選んでもらう。ユーザーが選択したPR番号で `gh pr view` / `gh pr diff` を実行して以降のワークフローに進む。
+番号とタイトルの一覧をユーザーに提示し、レビュー対象を選んでもらう。ユーザーが選択したPR番号で `gh pr view`（`number,title,body,baseRefName,headRefName,headRefOid,url`）および `gh pr diff` を実行して以降のワークフローに進む。
 
 ### owner/repo/numberの取得
 
@@ -48,7 +48,9 @@ gh pr view "$0" --json url --jq '.url'
 ## ワークフロー
 
 ```
-1. 上記の自動取得データを確認（取得失敗時はユーザーに報告して中断）
+1. PR特定とデータ取得
+   - 引数あり: 上記の自動取得データを確認（取得失敗時はユーザーに報告して中断）
+   - 引数なし（自動取得が空の場合）: 「引数なしの場合」の手順でオープン中のPR一覧からユーザーに選択させ、gh pr view / gh pr diff で取得
    ↓
 2. ローカルリポジトリの有無を判定
    ↓
@@ -158,17 +160,19 @@ diffだけでは文脈を把握できないため、変更があったファイ�
 
 各指摘は以下の形式で記述する:
 
-```
+````
 **[レベル]** 観点カテゴリ
 
 指摘内容の説明。
 
 なぜ問題なのか、どう修正すべきかを具体的に記載。
 
-```suggestion（コード提案がある場合）
+```suggestion
 修正後のコード
 ```
-```
+````
+
+（` ```suggestion ` ブロックはコード提案がある場合のみ記載する）
 
 ### 全体サマリー
 
@@ -215,70 +219,52 @@ GitHubの「Files changed」上で、レビュアーが各変更行にコメン�
 
 ### 投稿手順
 
-3ステップで投稿する。人間のレビュアーが「Files changed」でコメントを書き溜めてから「Submit review」するのと同じ流れをAPIで再現する。
+GitHub REST API の `POST /repos/{owner}/{repo}/pulls/{pr_number}/reviews` に、`commit_id`・`event`・`body`（全体サマリー）・`comments`（インライン指摘の配列）をまとめた JSON を `--input -`（heredoc）で一括送信する。これにより、全コメントとサマリーが1つのレビューとしてまとめて公開される。
 
-#### Step 1: Pendingレビューを作成
-
-```bash
-gh api \
-  "repos/{owner}/{repo}/pulls/{pr_number}/reviews" \
-  --method POST \
-  --field body="全体サマリー" \
-  --jq '.id'
-```
-
-これでレビューIDが返る。この時点ではまだ下書き（PENDING）状態。
-
-#### Step 2: 各指摘をレビューコメントとして追加
-
-指摘ごとに、該当ファイル・該当行にコメントを追加する。すべて Step 1 で作成したレビューに紐づく。
-
-```bash
-gh api \
-  "repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}/comments" \
-  --method POST \
-  --field path="src/utils/parser.ts" \
-  --field line=42 \
-  --field side="RIGHT" \
-  --field body="**[MUST]** バグ
-
-説明..."
-```
-
-コード修正の提案がある場合は、GitHub Suggested Changes形式を使う:
+- `commit_id`: レビュー対象コミットの SHA（`gh pr view` の `headRefOid` で取得）。省略時は PR の最新コミットが対象になるが、レビュー中への追加 push による行ずれを防ぐため指定を推奨する。
+- `comments`: インライン指摘がない場合（指摘なしの `APPROVE` 等）は空配列 `[]` またはキーごと省略する。
 
 ````bash
 gh api \
-  "repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}/comments" \
+  "repos/{owner}/{repo}/pulls/{pr_number}/reviews" \
   --method POST \
-  --field path="src/utils/parser.ts" \
-  --field line=42 \
-  --field side="RIGHT" \
-  --field body='**[SHOULD]** パフォーマンス
-
-`Array.find`の方が意図が明確です。
-
-```suggestion
-const user = users.find(u => u.id === targetId);
-```'
+  --input - <<'EOF'
+{
+  "commit_id": "{headRefOid}",
+  "event": "{APPROVE|COMMENT|REQUEST_CHANGES}",
+  "body": "## コードレビュー\n\n### 概要\n...",
+  "comments": [
+    {
+      "path": "src/utils/parser.ts",
+      "line": 42,
+      "side": "RIGHT",
+      "body": "**[MUST]** バグ\n\n説明..."
+    },
+    {
+      "path": "src/utils/parser.ts",
+      "line": 58,
+      "side": "RIGHT",
+      "body": "**[SHOULD]** パフォーマンス\n\n`Array.find`の方が意図が明確です。\n\n```suggestion\nconst user = users.find(u => u.id === targetId);\n```"
+    }
+  ]
+}
+EOF
 ````
 
-全指摘を追加し終わるまで繰り返す。
+コード修正の提案がある場合は、上記2件目のようにコメント `body` 内に GitHub Suggested Changes 形式（` ```suggestion ... ``` `）を含める。
 
-#### Step 3: レビューをSubmit
+### リクエスト・コメントのフィールド仕様
 
-全コメントの追加が完了したら、レビューを確定する。
+トップレベル:
 
-```bash
-gh api \
-  "repos/{owner}/{repo}/pulls/{pr_number}/reviews/{review_id}/events" \
-  --method POST \
-  --field event="{APPROVE|COMMENT|REQUEST_CHANGES}"
-```
+| フィールド | 必須 | 説明 |
+|:-|:-|:-|
+| `commit_id` | No（推奨） | レビュー対象のコミット SHA（`headRefOid`）。省略時は PR の最新コミット |
+| `event` | Yes | `APPROVE` / `COMMENT` / `REQUEST_CHANGES` のいずれか |
+| `body` | Yes | 全体サマリー（Markdown 対応） |
+| `comments` | No | インラインコメントオブジェクトの配列 |
 
-これで全コメントが1つのレビューとしてまとめて公開される。
-
-### コメントのフィールド仕様
+`comments[]` の各要素:
 
 | フィールド | 必須 | 説明 |
 |:-|:-|:-|
@@ -286,7 +272,8 @@ gh api \
 | `line` | Yes | コメントを付ける行番号（diff上の新ファイル側の行番号） |
 | `side` | Yes | `RIGHT`（新コード側）を指定する |
 | `start_line` | No | 複数行に対するコメントの開始行（`line`が終了行になる） |
-| `body` | Yes | コメント本文（Markdown対応） |
+| `start_side` | No | 複数行コメント時の開始行の側（`start_line`指定時に使用、`RIGHT` 等） |
+| `body` | Yes | コメント本文（Markdown・`suggestion` ブロック対応） |
 
 ### 行番号の特定方法
 
@@ -314,4 +301,4 @@ gh api \
 - 変更に関係のないコードへの指摘
 - スタイルの好みだけに基づく指摘（プロジェクト規約にない限り）
 - 過度に細かい指摘の大量投稿（重要な問題に集中する）
-- ユーザーの承認なしにREQUEST_CHANGESイベントで投稿すること
+- イベント種別を問わずユーザーの承認なしにレビューを投稿すること
